@@ -1,0 +1,32 @@
+[
+  {
+    "review": "The necklace was even more beautiful in person. The packaging felt like unwrapping a gift from a dear friend!",
+    "name": "Ananya R., Delhi",
+    "stars": 5,
+    "top": true
+  },
+  {
+    "review": "I got a custom art print for my sister's birthday. She cried. That's all I need to say about Saanjh Studio.",
+    "name": "Rohan M., Bengaluru",
+    "stars": 5,
+    "top": true
+  },
+  {
+    "review": "The keychain is tiny but absolutely perfect — every detail is so precise. I've gifted three already to friends.",
+    "name": "Priya S., Mumbai",
+    "stars": 5,
+    "top": true
+  },
+  {
+    "review": "Ordered the Celestial Map print for my boyfriend's birthday. He absolutely loves it — hanging above his desk!",
+    "name": "Sneha K., Pune",
+    "stars": 5,
+    "top": false
+  },
+  {
+    "review": "The packaging alone made me emotional. You can feel how much care goes into every single order.",
+    "name": "Meera T., Chennai",
+    "stars": 5,
+    "top": false
+  }
+]
