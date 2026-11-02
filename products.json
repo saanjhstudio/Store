@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Wildflower Reverie",
+    "filesrc": ["wildflower-1.jpg", "wildflower-2.jpg", "wildflower-3.jpg"],
+    "price": 1499,
+    "desc": "A dreamy hand-painted original on canvas — soft wildflowers in blush, ochre, and sage. Each petal placed with intention, no two strokes the same.",
+    "tags": ["art", "birthday", "anniversary"],
+    "inStock": true,
+    "emoji": "🌸"
+  },
+  {
+    "id": 2,
+    "name": "Moon Phase Necklace",
+    "filesrc": ["moon-necklace-1.jpg", "moon-necklace-2.jpg"],
+    "price": 549,
+    "desc": "Delicate brass necklace with hand-stamped moon phases. Adjustable chain, tarnish-resistant coating. A quiet reminder that you are always whole.",
+    "tags": ["necklace", "birthday", "just-because"],
+    "inStock": true,
+    "emoji": "🌙"
+  },
+  {
+    "id": 3,
+    "name": "Pressed Daisy Keychain",
+    "filesrc": ["daisy-keychain.jpg"],
+    "price": 279,
+    "desc": "Real pressed daisies suspended in crystal-clear resin. Lightweight, durable, and impossibly pretty. A little garden you can carry everywhere.",
+    "tags": ["keychain", "birthday", "just-because"],
+    "inStock": false,
+    "emoji": "🌼"
+  }
+]
