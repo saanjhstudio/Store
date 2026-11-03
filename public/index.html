@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saanjh Studio | Handcrafted art, necklaces and keychains</title>
+<meta name="description" content="Handcrafted art, necklaces, keychains and decor, made by hand in India. Perfect gifts, perfectly made.">
+<meta name="theme-color" content="#fdf6f0">
+<meta property="og:title" content="Saanjh Studio">
+<meta property="og:description" content="Handcrafted art, necklaces, keychains and decor, made by hand in India.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%BF%3C/text%3E%3C/svg%3E">
+<script>try{var t=localStorage.getItem('saanjh-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#fdf6f0;--bg2:#f7ede4;--bg3:#f0e0d4;--sf:#fff;--bd:rgba(180,100,90,.18);--bd2:rgba(180,100,90,.32);--tx:#2d1a14;--tx2:#7a4f42;--tx3:#96685a;--rose:#c4607a;--rose2:#e8899a;--ink:#fff;--blush:#f2c4cc;--gold:#c8863a;--sh:rgba(180,100,90,.22)}
+[data-theme=dark]{color-scheme:dark;--bg:#1a0d10;--bg2:#231118;--bg3:#2e1820;--sf:#2a1520;--bd:rgba(196,96,122,.2);--bd2:rgba(196,96,122,.34);--tx:#f5e6e0;--tx2:#d0a08c;--tx3:#b08a7c;--rose:#e07888;--rose2:#f0a0b0;--ink:#1a0d10;--blush:#7a2838;--gold:#d4a050;--sh:rgba(0,0,0,.5)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font:300 15px/1.7 Raleway,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+main{flex:1}
+img{display:block;max-width:100%}a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--rose);outline-offset:3px}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:'Playfair Display',Georgia,serif;font-weight:400;line-height:1.15}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.mute{color:var(--tx3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 26px;border-radius:4px;background:var(--rose);color:var(--ink);font-weight:500;font-size:14px;letter-spacing:.04em;box-shadow:0 6px 20px var(--sh);transition:opacity .2s}
+.btn:hover{opacity:.88}
+.btn.out{background:none;color:var(--tx);border:1.5px solid var(--bd2);box-shadow:none}.btn.out:hover{border-color:var(--rose);color:var(--rose)}
+#ann{background:var(--rose);color:var(--ink);text-align:center;padding:7px 16px;font-size:13px;font-weight:500}
+.top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);padding-top:env(safe-area-inset-top)}
+.bar{display:flex;align-items:center;gap:20px;height:64px}
+.logo{font:500 20px 'Playfair Display',serif;display:flex;align-items:center;gap:9px;margin-right:auto}
+.logo i{font-style:normal;color:var(--rose)}
+.logo img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1.5px solid var(--bd2)}
+.nav{display:flex;gap:6px}
+.nav a{padding:9px 14px;font-size:14px;color:var(--tx2);border-bottom:2px solid transparent}
+.nav a:hover,.nav a[aria-current]{color:var(--rose);border-bottom-color:var(--rose)}
+.ico{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:18px;border:1px solid var(--bd)}
+.ico:hover{border-color:var(--rose)}
+#menu{display:none}
+@media(max-width:768px){
+  #menu{display:grid}
+  .nav{display:none;position:absolute;left:0;right:0;top:100%;flex-direction:column;background:var(--bg);border-bottom:1px solid var(--bd);padding:8px 20px 14px}
+  .top.open .nav{display:flex}
+  .nav a{padding:14px 0;border-bottom:1px solid var(--bd);font-size:16px}
+}
+.sec{padding:52px 0 0}
+.sh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:24px}
+.sh h2{font-size:clamp(26px,4vw,40px)}
+.more{font-size:14px;color:var(--tx2);border-bottom:1px solid var(--bd2);padding-bottom:2px}.more:hover{color:var(--rose)}
+.hero{padding:72px 0 56px;position:relative}
+.hero::before{content:'';position:absolute;width:520px;height:520px;max-width:90vw;right:-120px;top:-60px;border-radius:50%;background:radial-gradient(circle,var(--blush),transparent 68%);opacity:.35;pointer-events:none}
+.hero h1{font-size:clamp(42px,8vw,80px);margin-bottom:20px;max-width:11ch}.hero em{color:var(--rose)}
+.hero p{max-width:440px;color:var(--tx2);margin-bottom:30px;font-size:16px}
+.hero .acts{display:flex;gap:12px;flex-wrap:wrap}
+.rib{overflow:hidden;border-block:1px solid var(--bd);background:var(--bg2);padding:11px 0}
+.rib div{display:flex;width:max-content;animation:mq 30s linear infinite}
+.rib span{padding:0 26px;font-size:12px;color:var(--tx3);white-space:nowrap}.rib span::after{content:'✿';margin-left:52px;color:var(--rose)}
+@keyframes mq{to{transform:translateX(-50%)}}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr);gap:14px}}
+.card{display:block}
+.ph{aspect-ratio:4/5;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;overflow:hidden;position:relative;display:grid;place-items:center;margin-bottom:10px;transition:border-color .25s}
+.card:hover .ph{border-color:var(--rose2)}
+.ph img{width:100%;height:100%;object-fit:cover;transition:transform .5s}.card:hover .ph img{transform:scale(1.04)}
+.em{font-size:56px}
+.badge{position:absolute;top:10px;left:10px;font-size:11px;font-weight:500;padding:2px 10px;border-radius:99px;background:var(--sf);color:var(--rose);border:1px solid var(--bd2)}
+.badge.sold{color:var(--tx3)}
+.card h3{font-size:17px;margin-bottom:3px}
+.tg{display:inline-block;font-size:12px;color:var(--tx3);background:var(--bg2);padding:0 9px;border-radius:99px}
+.pr{color:var(--rose);font-weight:500;margin-top:3px}.pr.sold{color:var(--tx3)}
+.empty{padding:56px 0;text-align:center;color:var(--tx3)}
+.ctl{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:20px 0 26px;flex-wrap:wrap}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pills a{padding:8px 16px;border:1px solid var(--bd);border-radius:99px;font-size:13px;color:var(--tx2);background:var(--bg2)}
+.pills a:hover,.pills a[aria-current]{border-color:var(--rose2);color:var(--rose);background:color-mix(in srgb,var(--rose) 12%,transparent)}
+select{min-height:42px;padding:0 12px;background:var(--sf);border:1px solid var(--bd);border-radius:6px;color:var(--tx2);font:inherit;font-size:14px}
+@media(max-width:700px){.pills{flex-wrap:nowrap;overflow-x:auto;margin-inline:-20px;padding:0 20px 4px;width:calc(100% + 40px);scrollbar-width:none}.pills a{white-space:nowrap}.ctl>select{width:100%}}
+.pp{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;padding:36px 0 0;align-items:start}
+@media(max-width:768px){.pp{grid-template-columns:1fr;gap:24px;padding-top:20px}}
+.crumb{font-size:13px;color:var(--tx3);padding-top:24px}.crumb a:hover{color:var(--rose)}
+.main-img{aspect-ratio:4/5;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;overflow:hidden;display:grid;place-items:center;font-size:90px}
+.main-img img{width:100%;height:100%;object-fit:cover}
+.thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto}
+.thumbs button{flex:0 0 68px;height:68px;border-radius:6px;overflow:hidden;border:2px solid transparent;opacity:.7}
+.thumbs button[aria-current]{border-color:var(--rose);opacity:1}.thumbs img{width:100%;height:100%;object-fit:cover}
+.pp h1{font-size:clamp(30px,5vw,42px);margin:8px 0 10px}
+.pp .price{font-size:24px;color:var(--rose);margin-bottom:16px}
+.pp .desc{color:var(--tx2);margin-bottom:24px;white-space:pre-line}
+.ord{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.ord .btn{width:100%}
+.sold-note{background:var(--bg3);border-radius:6px;padding:12px 16px;font-style:italic;color:var(--tx2);margin-bottom:14px}
+.note{font-size:13px;color:var(--tx3)}
+.rv{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.rv{grid-template-columns:1fr}}
+.rc{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:22px}
+.st{color:var(--gold);letter-spacing:2px;font-size:13px;margin-bottom:8px}
+.rc p{font:italic 400 16px/1.7 'Playfair Display',serif;margin-bottom:10px}.rc small{font-size:13px;color:var(--tx3)}
+.cta{background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:40px 36px;display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cta h2{font-size:clamp(24px,3.5vw,34px);margin-bottom:6px}.cta p{color:var(--tx2)}
+.cta .ord{flex-direction:row;flex-wrap:wrap;margin:0}.cta .ord .btn{width:auto}
+@media(max-width:700px){.cta{padding:28px 20px}.cta .ord,.cta .ord .btn{width:100%}.cta .ord{flex-direction:column}}
+.prose{max-width:640px}.prose p{color:var(--tx2);margin-bottom:16px}
+.vals{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+@media(max-width:768px){.vals{grid-template-columns:1fr}}
+.vals div{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:22px}.vals h3{font-size:19px;margin-bottom:6px}.vals p{font-size:14px;color:var(--tx2)}
+.page-h{padding:44px 0 0}.page-h h1{font-size:clamp(32px,6vw,52px);margin-bottom:8px}
+.gal{columns:3 240px;column-gap:12px;margin-top:28px}
+.gal figure{break-inside:avoid;margin:0 0 12px}
+.gal img{width:100%;border-radius:6px;border:1px solid var(--bd);background:var(--bg2)}
+.gal figcaption{font-size:13px;color:var(--tx3);padding:6px 2px 0}
+@media(max-width:700px){.gal{columns:2;column-gap:10px}}
+footer{margin-top:72px;background:var(--bg2);border-top:1px solid var(--bd);padding:44px 0 calc(24px + env(safe-area-inset-bottom))}
+.fg{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:40px;margin-bottom:32px}
+@media(max-width:768px){.fg{grid-template-columns:1fr 1fr;gap:28px}.fg>div:first-child{grid-column:1/-1}}
+footer h4{font-size:13px;font-weight:600;color:var(--rose);margin-bottom:12px}
+footer ul{list-style:none;display:flex;flex-direction:column}
+footer li a{display:inline-block;padding:6px 0;font-size:14px;color:var(--tx3)}footer li a:hover{color:var(--rose)}
+.fb{font:500 19px 'Playfair Display',serif;margin-bottom:8px;display:flex;align-items:center;gap:10px}.fb img{border-radius:50%;object-fit:cover}.fd{font-size:14px;color:var(--tx3);max-width:340px}
+.fine{border-top:1px solid var(--bd);padding-top:18px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--tx3)}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,90px);background:var(--tx);color:var(--bg);padding:11px 22px;border-radius:99px;font-size:14px;z-index:99;transition:transform .3s;max-width:90vw;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+@media(min-width:769px){.wrap{padding:0 40px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="ann" hidden></div>
+<header class="top" id="top">
+  <div class="wrap bar">
+    <a class="logo" href="/" data-r><img src="/assets/images/logo.png" alt="" width="40" height="40" onerror="this.replaceWith(Object.assign(document.createElement('i'),{textContent:'✿'}))">Saanjh Studio</a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/" data-r>Home</a><a href="/shop" data-r>Shop</a><a href="/gallery" data-r>Gallery</a><a href="/about" data-r>About</a><a href="/reviews" data-r>Reviews</a>
+    </nav>
+    <button class="ico" id="theme" aria-label="Switch between light and dark theme">◐</button>
+    <button class="ico" id="menu" aria-label="Open menu" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<main id="view" class="wrap"><p class="empty">Loading…</p></main>
+
+<footer>
+  <div class="wrap">
+    <div class="fg">
+      <div><p class="fb"><img src="/assets/images/logo.png" alt="" width="32" height="32" onerror="this.remove()">Saanjh Studio</p><p class="fd">Handcrafted art, necklaces, keychains and decor. Made with love in India, and named after the quiet magic of dusk.</p></div>
+      <div><h4>Explore</h4><ul>
+        <li><a href="/" data-r>Home</a></li><li><a href="/shop" data-r>Shop</a></li><li><a href="/gallery" data-r>Gallery</a></li><li><a href="/about" data-r>About</a></li><li><a href="/reviews" data-r>Reviews</a></li></ul></div>
+      <div><h4>Get in touch</h4><ul id="fcontact"><li><a href="/shop" data-r>Browse the shop</a></li></ul></div>
+    </div>
+    <div class="fine"><span>© 2026 Saanjh Studio. Made with ♥ in India.</span><span>Every piece is an original, handmade work.</span></div>
+  </div>
+</footer>
+<div id="toast" role="status"></div>
+
+<script src="/analytics.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const inr = n => '₹' + n.toLocaleString('en-IN');
+const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+const fill = (t, p) => String(t).replace(/\{\{\s*product name\s*\}\}/gi, p.name).replace(/\{\{\s*product id\s*\}\}/gi, p.id);
+const DEF_MSG = "Hi Saanjh Studio! I'd like to order {{Product Name}} (Product ID: {{Product ID}}). Is it still available?";
+const D = { products: [], tags: [], reviews: [], gallery: [], cfg: {} };
+let sortBy = 'default', tt;
+const tagLabel = s => D.tags.find(t => t.slug === s)?.label || '';
+function toast(m) { const t = $('#toast'); t.textContent = m; t.className = 'show'; clearTimeout(tt); tt = setTimeout(() => t.className = '', 3200); }
+
+function orderBtns(p) {
+  const s = D.cfg, out = [];
+  const lead = !p ? 'Message us on ' : p.inStock ? 'Order on ' : 'Ask for similar work on ';
+  const msg = t => !p ? 'Hi Saanjh Studio! I would love a custom piece.'
+    : p.inStock ? fill(s[t] || DEF_MSG, p)
+    : `Hi Saanjh Studio! I loved ${p.name} (Product ID: ${p.id}). Could you make something similar?`;
+  const ev = `data-ev="${p ? 'order_click' : 'social_click'}"${p ? ` data-pid="${p.id}"` : ''}`;
+  if (s.wa_enabled === '1' && s.whatsapp)
+    out.push(`<a class="btn" target="_blank" rel="noopener" ${ev} href="https://wa.me/${esc(s.whatsapp)}?text=${encodeURIComponent(msg('wa_template'))}">${lead}WhatsApp</a>`);
+  if (s.ig_enabled === '1' && s.instagram_handle)
+    out.push(`<a class="btn${out.length ? ' out' : ''}" target="_blank" rel="noopener" ${ev} data-copy="${esc(msg('ig_template'))}" href="https://ig.me/m/${esc(s.instagram_handle)}">${lead}Instagram</a>`);
+  return `<div class="ord">${out.join('') || '<p class="mute">Ordering is paused right now. Please check back soon.</p>'}</div>` +
+    (s.ig_enabled === '1' && s.instagram_handle ? '<p class="note">On Instagram, your message is copied for you. Just paste it in the chat.</p>' : '');
+}
+
+const card = p => `<a class="card" href="/product/${esc(p.slug)}" data-r><div class="ph">${p.images[0] ? `<img src="${esc(p.images[0])}" alt="${esc(p.name)}" loading="lazy">` : `<span class="em">${esc(p.emoji || '🎨')}</span>`}<span class="badge${p.inStock ? '' : ' sold'}">${p.inStock ? 'Available' : 'Sold'}</span></div><h3>${esc(p.name)}</h3>${p.tag ? `<span class="tg">${esc(tagLabel(p.tag))}</span>` : ''}<p class="pr${p.inStock ? '' : ' sold'}">${p.inStock ? inr(p.price) : 'Sold'}</p></a>`;
+const review = r => `<div class="rc"><div class="st" aria-label="${r.stars} out of 5 stars">${stars(r.stars)}</div><p>“${esc(r.review)}”</p><small>${esc(r.name)}</small></div>`;
+
+function home() {
+  const feat = D.products.filter(p => p.featured), list = (feat.length ? feat : D.products).slice(0, 4);
+  const top = D.reviews.filter(r => r.top).slice(0, 3), rib = (D.cfg.ribbon || '').split('\n').filter(Boolean);
+  return [`<section class="hero"><h1>Art that <em>feels like</em> a feeling</h1>
+      <p>Every piece at Saanjh Studio is made by hand, from painted canvases to delicate necklaces and keychains. Perfect gifts, perfectly made.</p>
+      <div class="acts"><a class="btn" href="/shop" data-r>Browse the shop</a><a class="btn out" href="/about" data-r>Our story</a></div></section>` +
+    (rib.length ? `<div class="rib" aria-hidden="true"><div>${[...rib, ...rib, ...rib, ...rib].map(t => `<span>${esc(t)}</span>`).join('')}</div></div>` : '') +
+    (list.length ? `<section class="sec"><div class="sh"><h2>${feat.length ? 'Featured pieces' : 'New pieces'}</h2><a class="more" href="/shop" data-r>See all pieces</a></div><div class="grid">${list.map(card).join('')}</div></section>` : '') +
+    (top.length ? `<section class="sec"><div class="sh"><h2>What people say</h2><a class="more" href="/reviews" data-r>See all reviews</a></div><div class="rv">${top.map(review).join('')}</div></section>` : '') +
+    `<section class="sec"><div class="cta"><div><h2>Looking for a custom piece?</h2><p>Tell us your idea and we will bring it to life.</p></div>${orderBtns(null)}</div></section>`, 'Saanjh Studio | Handcrafted art, necklaces and keychains'];
+}
+
+function shop(tag) {
+  if (tag && !D.tags.some(t => t.slug === tag)) tag = '';
+  const pill = (slug, label) => `<a href="/shop${slug ? '?tag=' + esc(slug) : ''}" data-r data-keep ${(tag || '') === slug ? 'aria-current="true"' : ''}>${esc(label)}</a>`;
+  return [`<div class="page-h"><h1>All pieces</h1><p class="mute">Handmade, one at a time.</p></div>
+    <div class="ctl"><div class="pills">${pill('', 'All')}${D.tags.map(t => pill(t.slug, t.label)).join('')}</div>
+    <select id="sort" aria-label="Sort pieces"><option value="default">Sort: Newest</option><option value="asc">Price: low to high</option><option value="desc">Price: high to low</option><option value="stock">Available first</option></select></div>
+    <div class="grid" id="grid" data-tag="${esc(tag || '')}"></div>`, (tag ? tagLabel(tag) + ' | ' : '') + 'Shop | Saanjh Studio', 'Browse handmade art, necklaces and keychains from Saanjh Studio.'];
+}
+function drawGrid() {
+  const g = $('#grid'); if (!g) return;
+  let l = D.products.filter(p => !g.dataset.tag || p.tag === g.dataset.tag);
+  if (sortBy === 'asc') l.sort((a, b) => a.price - b.price); else if (sortBy === 'desc') l.sort((a, b) => b.price - a.price);
+  else if (sortBy === 'stock') l.sort((a, b) => b.inStock - a.inStock);
+  g.innerHTML = l.map(card).join('') || '<p class="empty" style="grid-column:1/-1">No pieces here yet. New work is added often.</p>';
+}
+
+function product(slug) {
+  const p = D.products.find(x => x.slug === slug); if (!p) return notFound();
+  const main = p.images[0] ? `<img id="mimg" src="${esc(p.images[0])}" alt="${esc(p.name)}">` : esc(p.emoji || '🎨');
+  return [`<p class="crumb"><a href="/shop" data-r>Shop</a> / ${esc(p.name)}</p><div class="pp"><div><div class="main-img">${main}</div>
+    ${p.images.length > 1 ? `<div class="thumbs">${p.images.map((u, i) => `<button data-img="${esc(u)}" aria-label="Photo ${i + 1}" ${i ? '' : 'aria-current="true"'}><img src="${esc(u)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}</div>
+    <div>${p.tag ? `<span class="tg">${esc(tagLabel(p.tag))}</span>` : ''}<h1>${esc(p.name)}</h1>
+    <p class="price">${p.inStock ? inr(p.price) : 'Sold'}</p><p class="desc">${esc(p.desc)}</p>
+    ${p.inStock ? '' : '<div class="sold-note">This piece has found its home.</div>'}${orderBtns(p)}</div></div>`,
+    p.name + ' | Saanjh Studio', (p.desc || '').slice(0, 155), p.id];
+}
+const reviews = () => [`<div class="page-h"><h1>Reviews</h1><p class="mute">Kind words from people who brought a piece of Saanjh home.</p></div><div class="rv" style="margin-top:28px">${D.reviews.map(review).join('') || '<p class="empty">Reviews will appear here soon.</p>'}</div>`, 'Reviews | Saanjh Studio'];
+const about = () => [`<div class="page-h"><h1>Where Saanjh began</h1></div><div class="prose" style="margin-top:20px">
+  <p><b>Saanjh</b> is the Hindi word for dusk, the quiet golden hour between day and night, when everything softens. That feeling is what this studio is built on.</p>
+  <p>What started as a personal way to process emotions through art slowly became something people wanted to hold onto. A friend asked for a keychain. A cousin wanted a painting. And slowly, Saanjh Studio was born.</p>
+  <p>Every piece is made entirely by hand, so no two are exactly alike. When you give someone a piece from Saanjh Studio, you give them something that existed only for them.</p></div>
+  <div class="vals"><div><h3>Truly handmade</h3><p>Every stroke, bead and cut is done by hand. No machines, no shortcuts.</p></div>
+  <div><h3>Made to gift</h3><p>Each piece is wrapped by hand, with a personal note inside.</p></div>
+  <div><h3>Made with care</h3><p>Quality materials, chosen thoughtfully, to be loved for years.</p></div></div>
+  <section class="sec"><div class="cta"><div><h2>Want something made for you?</h2><p>Custom orders are always welcome.</p></div>${orderBtns(null)}</div></section>`, 'About | Saanjh Studio', 'The story behind Saanjh Studio and how each handmade piece is made.'];
+const gallery = () => {
+  const ig = D.cfg.instagram_handle;
+  return [`<div class="page-h"><h1>A peek into our world</h1><p class="mute">Late nights, paint-stained hands, and the quiet joy of making.</p></div>
+    <div class="gal">${D.gallery.map(g => `<figure><img src="${esc(g.url)}" alt="${esc(g.caption || 'Studio photo')}" loading="lazy">${g.caption ? `<figcaption>${esc(g.caption)}</figcaption>` : ''}</figure>`).join('') || '<p class="empty">Photos from the studio will appear here soon.</p>'}</div>` +
+    (ig ? `<section class="sec"><div class="cta"><div><h2>Follow along</h2><p>Daily drops and behind-the-scenes on Instagram.</p></div><div class="ord"><a class="btn" target="_blank" rel="noopener" data-ev="social_click" href="https://www.instagram.com/${esc(ig)}/">Follow on Instagram</a></div></div></section>` : ''),
+    'Gallery | Saanjh Studio', 'A look inside the Saanjh Studio: handmade work, studio moments and new pieces.'];
+};
+const notFound = () => [`<div class="empty"><h1>We couldn't find that page</h1><p style="margin:12px 0 22px">It may have moved, or the piece may no longer be listed.</p><a class="btn" href="/shop" data-r>Browse the shop</a></div>`, 'Page not found | Saanjh Studio'];
+
+function route(keep) {
+  const path = location.pathname.replace(/\/+$/, '') || '/', q = new URLSearchParams(location.search); let m;
+  const [html, title, desc, pid] = path === '/' ? home() : path === '/shop' ? shop(q.get('tag')) : path === '/gallery' ? gallery() : path === '/about' ? about() : path === '/reviews' ? reviews()
+    : (m = path.match(/^\/product\/([\w-]+)$/)) ? product(m[1]) : notFound();
+  $('#view').innerHTML = html; document.title = title;
+  document.querySelector('meta[name=description]').content = desc || 'Handcrafted art, necklaces, keychains and decor, made by hand in India.';
+  document.querySelectorAll('.nav a').forEach(a => a.toggleAttribute('aria-current', a.pathname === (path.startsWith('/product') ? '/shop' : path)));
+  $('#sort')?.addEventListener('change', e => { sortBy = e.target.value; drawGrid(); });
+  if ($('#sort')) $('#sort').value = sortBy;
+  drawGrid(); if (!keep) scrollTo(0, 0);
+  $('#top').classList.remove('open'); $('#menu').setAttribute('aria-expanded', 'false');
+  track('page_view'); if (pid) track('product_view', pid);
+}
+function go(url, keep) { history.pushState({}, '', url); route(keep); }
+addEventListener('popstate', () => route(true));
+
+document.addEventListener('click', e => {
+  const a = e.target.closest('a,button'); if (!a) return;
+  if (a.dataset.img) { $('#mimg').src = a.dataset.img; a.parentNode.querySelectorAll('button').forEach(b => b.removeAttribute('aria-current')); a.setAttribute('aria-current', 'true'); return; }
+  if (a.dataset.copy && navigator.clipboard) navigator.clipboard.writeText(a.dataset.copy).then(() => toast('Message copied. Paste it in the chat.')).catch(() => {});
+  if (a.dataset.ev) track(a.dataset.ev, a.dataset.pid ? +a.dataset.pid : null);
+  if (a.dataset.r !== undefined && !(e.metaKey || e.ctrlKey || e.shiftKey || e.button)) { e.preventDefault(); go(a.getAttribute('href'), a.dataset.keep !== undefined); }
+});
+
+$('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try { localStorage.setItem('saanjh-theme', t); } catch {} };
+$('#menu').onclick = () => { const o = $('#top').classList.toggle('open'); $('#menu').setAttribute('aria-expanded', o); };
+function chrome() {
+  const s = D.cfg, a = $('#ann'); a.hidden = !s.announcement; a.textContent = s.announcement || '';
+  const links = [];
+  if (s.ig_enabled === '1' && s.instagram_handle) links.push(`<li><a target="_blank" rel="noopener" data-ev="social_click" href="https://www.instagram.com/${esc(s.instagram_handle)}/">Instagram @${esc(s.instagram_handle)}</a></li>`);
+  if (s.wa_enabled === '1' && s.whatsapp) links.push(`<li><a target="_blank" rel="noopener" data-ev="social_click" href="https://wa.me/${esc(s.whatsapp)}">WhatsApp</a></li>`);
+  links.push('<li><a href="/shop" data-r>Browse the shop</a></li>');
+  $('#fcontact').innerHTML = links.join('');
+}
+
+async function load() {
+  $('#view').innerHTML = '<p class="empty">Loading…</p>';
+  try {
+    const [p, c, r, g] = await Promise.all(['/api/products', '/api/config', '/api/reviews', '/api/gallery'].map(u => fetch(u).then(x => { if (!x.ok) throw 0; return x.json(); })));
+    D.products = p; D.tags = c.tags; D.cfg = c.settings; D.reviews = r; D.gallery = g;
+    chrome(); route(true);
+  } catch {
+    $('#view').innerHTML = `<div class="empty"><h2>We couldn't load the shop</h2><p style="margin:10px 0 20px">Check your connection and try again.</p><button class="btn" id="retry">Try again</button></div>`;
+    $('#retry').onclick = load;
+  }
+}
+// Old-style links like /#/shop or /#/ open the matching page; a plain / opens Home.
+if (location.hash.startsWith('#/')) history.replaceState({}, '', location.hash.slice(1));
+load();
+</script>
+</body>
+</html>
