@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Saanjh Studio admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fdf6f0;--bg2:#f7ede4;--surface:#fff;--line:rgba(180,100,90,.2);--text:#2d1a14;--mute:#7f5648;--rose:#c4607a;--rose-ink:#fff;--ok:#3f8a5a;--bad:#b83a4b;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#1a0d10;--bg2:#231118;--surface:#2a1520;--line:rgba(196,96,122,.26);--text:#f5e6e0;--mute:#c4a090;--rose:#e07888;--rose-ink:#1a0d10;--ok:#6cc08a;--bad:#f28b99;color-scheme:dark}}
+*{box-sizing:border-box;margin:0}
+body{font:400 14px/1.55 Raleway,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+h1,h2{font-family:'Playfair Display',Georgia,serif;font-weight:500}
+h1{font-size:28px}h2{font-size:21px;margin-bottom:14px}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.mute{color:var(--mute)}.err{color:var(--bad);min-height:1.4em;font-size:13px}.empty{padding:36px 0;text-align:center}
+.btn,.ghost{border-radius:6px;padding:8px 16px;cursor:pointer;border:1px solid var(--rose);font-weight:500;white-space:nowrap}
+.btn{background:var(--rose);color:var(--rose-ink)}.btn:disabled{opacity:.5}
+.ghost{background:none;color:var(--text);border-color:var(--line);padding:6px 12px;font-size:13px}
+.ghost:hover{border-color:var(--rose)}.danger{color:var(--bad)}
+input,select,textarea{width:100%;padding:9px 11px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+input[type=checkbox]{width:auto}
+label{display:block;font-weight:500;font-size:13px;margin-bottom:12px}
+label input,label select,label textarea{margin-top:4px;font-weight:400}
+#login{min-height:100vh;display:grid;place-items:center;padding:20px}
+#login form{width:100%;max-width:340px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:30px}
+#login h1{margin-bottom:4px}#login .mute{margin-bottom:20px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:10px 24px}
+.brand{font:500 18px 'Playfair Display',serif;white-space:nowrap}
+nav{display:flex;gap:4px;overflow-x:auto;flex:1}
+nav a{padding:7px 13px;border-radius:6px;color:var(--mute);text-decoration:none;white-space:nowrap}
+nav a:hover{color:var(--text)}nav a.on{background:var(--bg2);color:var(--rose);font-weight:600}
+main{max-width:960px;margin:0 auto;padding:28px 24px 80px}
+.head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.row{display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+.grow{flex:1;min-width:0}.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.num{width:72px}
+.thumb{width:56px;height:56px;border-radius:6px;background:var(--bg2);display:grid;place-items:center;font-size:26px;overflow:hidden;flex-shrink:0}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.pill{display:inline-block;font-size:11px;padding:1px 8px;border-radius:99px;background:var(--bg2);color:var(--rose);margin:4px 5px 0 0;font-weight:500}
+.pill.off{color:var(--mute)}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);padding:26px;width:min(560px,94vw);max-height:92vh;overflow:auto;margin:auto}
+dialog::backdrop{background:rgba(20,8,10,.55)}
+.foot{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.checks{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px}.checks label{margin:0;font-weight:400}
+.imgs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+.im{width:92px}.im img{width:92px;height:92px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+.im span{display:flex;justify-content:space-between}.im button{border:0;background:none;cursor:pointer;color:var(--mute);padding:2px 5px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-bottom:18px;max-width:640px}
+.preview{background:var(--bg2);border-radius:8px;padding:10px 12px;white-space:pre-wrap;margin:4px 0 0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 10px}
+code{background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
+.stat b{display:block;font:500 30px 'Playfair Display',serif;color:var(--rose)}
+.bars{height:130px;display:flex;align-items:flex-end;gap:3px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:22px}
+.bars i{flex:1;background:var(--rose);border-radius:2px 2px 0 0;min-width:2px;opacity:.85}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:22px}
+.li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+th,td{text-align:right;padding:9px 12px;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--mute);font-size:13px}
+#toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,70px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:8px;transition:transform .25s;z-index:99}
+#toast.show{transform:translate(-50%,0)}#toast.bad{background:var(--bad);color:#fff}
+@media(max-width:640px){header{padding:10px 14px;gap:10px}main{padding:20px 14px 70px}.row{flex-wrap:wrap}.acts{width:100%;justify-content:flex-start}.two{grid-template-columns:1fr}.brand{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<section id="login" hidden>
+  <form id="loginForm">
+    <h1>Saanjh admin</h1>
+    <p class="mute">Sign in to manage the shop.</p>
+    <label>Username<input name="username" autocomplete="username" required></label>
+    <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+    <p class="err" id="loginErr"></p>
+    <button class="btn" style="width:100%">Sign in</button>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header>
+    <span class="brand">Saanjh admin</span>
+    <nav id="tabs"></nav>
+    <span class="mute" id="who"></span>
+    <button class="ghost" id="out">Sign out</button>
+  </header>
+  <main id="view"></main>
+</div>
+
+<dialog id="dlg"></dialog>
+<div id="toast" role="status"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const S = { user: null, tags: [], products: [], days: 30 };
+
+async function api(path, method = 'GET', body) {
+  const o = { method, headers: {} };
+  if (body instanceof FormData) o.body = body;
+  else if (body !== undefined) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(body); }
+  const r = await fetch('/api' + path, o);
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && path !== '/login') { showLogin(); throw new Error('Signed out'); }
+  if (!r.ok) throw new Error(j.error || 'Something went wrong');
+  return j;
+}
+let tt;
+function toast(msg, bad) {
+  const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : '');
+  clearTimeout(tt); tt = setTimeout(() => t.className = '', 2600);
+}
+addEventListener('unhandledrejection', e => { if (e.reason?.message !== 'Signed out') toast(e.reason?.message || 'Something went wrong', 1); });
+
+const vals = f => Object.fromEntries([...f.elements].filter(e => e.name).map(e => [e.name, e.type === 'checkbox' ? e.checked : e.value]));
+function form(title, body, submit, after) {
+  const d = $('#dlg');
+  d.innerHTML = `<form id="f"><h2>${title}</h2>${body}<p class="err" id="ferr"></p><div class="foot"><button type="button" class="ghost" onclick="$('#dlg').close()">Cancel</button><button class="btn">Save changes</button></div></form>`;
+  $('#f').onsubmit = async e => {
+    e.preventDefault(); const b = e.submitter; b.disabled = true;
+    try { await submit(vals(e.target)); d.close(); } catch (err) { $('#ferr').textContent = err.message; }
+    b.disabled = false;
+  };
+  after && after();
+  d.showModal();
+}
+
+const VIEWS = { products: vProducts, tags: vTags, gallery: vGallery, reviews: vReviews, prefill: vPrefill, analytics: vAnalytics, settings: vSettings, team: vTeam };
+const LABELS = { products: 'Products', tags: 'Item tags', gallery: 'Gallery', reviews: 'Reviews', prefill: 'Prefill messages', analytics: 'Analytics', settings: 'Settings', team: 'Team' };
+$('#tabs').innerHTML = Object.keys(VIEWS).map(k => `<a href="#${k}" data-t="${k}">${LABELS[k]}</a>`).join('');
+
+function showLogin() { $('#app').hidden = true; $('#login').hidden = false; S.user = null; }
+function showApp() { $('#login').hidden = true; $('#app').hidden = false; $('#who').textContent = S.user.username; route(); }
+async function route() {
+  const t = location.hash.slice(1) in VIEWS ? location.hash.slice(1) : 'products';
+  document.querySelectorAll('#tabs a').forEach(a => a.classList.toggle('on', a.dataset.t === t));
+  $('#view').innerHTML = '<p class="mute">Loading…</p>';
+  try { await VIEWS[t](); } catch (e) { if (e.message !== 'Signed out') $('#view').innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+}
+addEventListener('hashchange', () => S.user && route());
+$('#loginForm').onsubmit = async e => {
+  e.preventDefault(); $('#loginErr').textContent = '';
+  try { S.user = await api('/login', 'POST', vals(e.target)); e.target.reset(); showApp(); }
+  catch (err) { $('#loginErr').textContent = err.message; }
+};
+$('#out').onclick = async () => { await api('/logout', 'POST'); showLogin(); };
+api('/me').then(u => { S.user = u; showApp(); }).catch(() => showLogin());
+
+async function squash(file) {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error('Use JPG, PNG or WebP images');
+  const bmp = await createImageBitmap(file), k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
+  cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+  const blob = await new Promise(r => cv.toBlob(r, 'image/webp', .82));
+  return blob && blob.type === 'image/webp' ? blob : file;
+}
+
+const pBody = (p, o = {}) => ({ name: p.name, slug: p.slug, description: p.desc, price: p.price, tag: p.tag, inStock: p.inStock, featured: p.featured, visible: p.visible, emoji: p.emoji, sort: p.sort, images: p.images, ...o });
+
+async function vProducts() {
+  [S.products, S.tags] = await Promise.all([api('/admin/products'), api('/admin/tags')]);
+  const tagName = s => S.tags.find(t => t.slug === s)?.label || 'No tag';
+  $('#view').innerHTML = `<div class="head"><h1>Products</h1><button class="btn" onclick="editProduct()">New product</button></div>` +
+    (S.products.map(p => `<div class="row">
+      <div class="thumb">${p.images[0] ? `<img src="${esc(p.images[0])}" alt="">` : esc(p.emoji || '🎨')}</div>
+      <div class="grow"><b>${esc(p.name)}</b><div class="mute">₹${p.price.toLocaleString('en-IN')} &middot; ${esc(tagName(p.tag))}</div>
+        <div>${p.inStock ? '<span class="pill">In stock</span>' : '<span class="pill off">Sold</span>'}${p.featured ? '<span class="pill">Featured</span>' : ''}${p.visible ? '' : '<span class="pill off">Hidden</span>'}</div></div>
+      <div class="acts"><button class="ghost" onclick="toggleStock(${p.id})">${p.inStock ? 'Mark sold' : 'Mark available'}</button>
+        <button class="ghost" onclick="editProduct(${p.id})">Edit</button><button class="ghost danger" onclick="delProduct(${p.id})">Delete</button></div></div>`).join('')
+    || '<p class="mute empty">No products yet. Add your first piece to see it in the shop.</p>');
+}
+async function toggleStock(id) {
+  const p = S.products.find(x => x.id === id);
+  await api('/admin/products/' + id, 'PUT', pBody(p, { inStock: !p.inStock })); toast(p.inStock ? 'Marked sold' : 'Marked available'); vProducts();
+}
+async function delProduct(id) {
+  const p = S.products.find(x => x.id === id);
+  if (!confirm(`Delete "${p.name}" and its photos? This can't be undone.`)) return;
+  await api('/admin/products/' + id, 'DELETE'); toast('Product deleted'); vProducts();
+}
+function editProduct(id) {
+  const p = id ? S.products.find(x => x.id === id) : { name: '', slug: '', desc: '', price: '', tag: '', inStock: true, featured: false, visible: true, emoji: '', images: [], sort: 0 };
+  const imgs = [...p.images];
+  const paint = () => $('#imgs').innerHTML = imgs.map((u, i) => `<div class="im"><img src="${esc(u)}" alt=""><span>
+    <button type="button" data-m="${i},-1" aria-label="Move earlier">◀</button><button type="button" data-m="${i},0" aria-label="Remove photo">✕</button><button type="button" data-m="${i},1" aria-label="Move later">▶</button></span></div>`).join('')
+    || '<span class="mute">No photos yet. The first photo is the cover.</span>';
+  form(id ? 'Edit product' : 'New product', `
+    <label>Name<input name="name" required value="${esc(p.name)}"></label>
+    <div class="two"><label>Price (₹)<input name="price" type="number" min="0" required value="${esc(p.price)}"></label>
+      <label>Item tag<select name="tag"><option value="">No tag</option>${S.tags.map(t => `<option value="${esc(t.slug)}" ${t.slug === p.tag ? 'selected' : ''}>${esc(t.label)}</option>`).join('')}</select></label></div>
+    <label>Description<textarea name="description" rows="4">${esc(p.desc)}</textarea></label>
+    <div class="two"><label>Page address<input name="slug" placeholder="Made from the name" value="${esc(p.slug)}"></label>
+      <label>Emoji when no photo<input name="emoji" maxlength="4" value="${esc(p.emoji)}"></label></div>
+    <div class="checks"><label><input type="checkbox" name="inStock" ${p.inStock ? 'checked' : ''}> In stock</label>
+      <label><input type="checkbox" name="featured" ${p.featured ? 'checked' : ''}> Show on home page</label>
+      <label><input type="checkbox" name="visible" ${p.visible ? 'checked' : ''}> Visible in shop</label></div>
+    <div><b>Photos</b><div class="imgs" id="imgs"></div><input type="file" id="pick" accept="image/jpeg,image/png,image/webp" multiple></div>`,
+    async v => {
+      await api(id ? '/admin/products/' + id : '/admin/products', id ? 'PUT' : 'POST', { ...v, price: +v.price, images: imgs, sort: p.sort || 0 });
+      toast('Product saved'); vProducts();
+    },
+    () => {
+      paint();
+      $('#imgs').onclick = e => {
+        const m = e.target.dataset.m; if (!m) return;
+        const [i, d] = m.split(',').map(Number);
+        if (d === 0) imgs.splice(i, 1); else if (imgs[i + d]) [imgs[i], imgs[i + d]] = [imgs[i + d], imgs[i]];
+        paint();
+      };
+      $('#pick').onchange = async e => {
+        for (const f of e.target.files) {
+          try { const fd = new FormData(); fd.append('file', await squash(f), 'photo.webp'); imgs.push((await api('/admin/upload', 'POST', fd)).url); paint(); }
+          catch (err) { $('#ferr').textContent = err.message; }
+        }
+        e.target.value = '';
+      };
+    });
+}
+
+async function vTags() {
+  S.tags = await api('/admin/tags');
+  $('#view').innerHTML = `<div class="head"><h1>Item tags</h1></div>
+    <p class="mute" style="margin-bottom:16px">Tags become the filter buttons in the shop. Give each product one tag. Lower order numbers appear first.</p>
+    <form class="row" onsubmit="addTag(event)"><input name="label" class="grow" placeholder="New tag, like Bracelet" required><button class="btn">Add tag</button></form>` +
+    S.tags.map(t => `<form class="row" onsubmit="saveTag(event,'${esc(t.slug)}')">
+      <input name="label" class="grow" value="${esc(t.label)}" required aria-label="Tag name"><input name="sort" class="num" type="number" value="${t.sort || 0}" aria-label="Order">
+      <button class="ghost">Save</button><button type="button" class="ghost danger" onclick="delTag('${esc(t.slug)}')">Delete</button></form>`).join('');
+}
+async function addTag(e) {
+  e.preventDefault(); const label = e.target.label.value.trim(), slug = slugify(label);
+  if (!slug) return toast('Use letters or numbers in the tag name', 1);
+  await api('/admin/tags/' + slug, 'PUT', { label, sort: S.tags.length + 1 }); toast('Tag added'); vTags();
+}
+async function saveTag(e, slug) { e.preventDefault(); await api('/admin/tags/' + slug, 'PUT', { label: e.target.label.value, sort: e.target.sort.value }); toast('Tag saved'); vTags(); }
+async function delTag(slug) {
+  if (!confirm('Delete this tag? Products using it will have no tag.')) return;
+  await api('/admin/tags/' + slug, 'DELETE'); toast('Tag deleted'); vTags();
+}
+
+async function vReviews() {
+  S.reviews = await api('/admin/reviews');
+  $('#view').innerHTML = `<div class="head"><h1>Reviews</h1><button class="btn" onclick="editReview()">Add review</button></div>` +
+    (S.reviews.map(r => `<div class="row"><div class="grow"><b>${esc(r.name)}</b> <span class="mute">${'★'.repeat(r.stars)}</span>
+      <div class="mute">${esc(r.review.length > 140 ? r.review.slice(0, 140) + '…' : r.review)}</div>
+      <div>${r.top ? '<span class="pill">On home page</span>' : ''}${r.visible ? '' : '<span class="pill off">Hidden</span>'}</div></div>
+      <div class="acts"><button class="ghost" onclick="editReview(${r.id})">Edit</button><button class="ghost danger" onclick="delReview(${r.id})">Delete</button></div></div>`).join('')
+    || '<p class="mute empty">No reviews yet. Add kind words from customers.</p>');
+}
+function editReview(id) {
+  const r = id ? S.reviews.find(x => x.id === id) : { name: '', review: '', stars: 5, top: 0, visible: 1 };
+  form(id ? 'Edit review' : 'Add review', `
+    <div class="two"><label>Customer name and city<input name="name" required value="${esc(r.name)}"></label>
+      <label>Stars<select name="stars">${[5, 4, 3, 2, 1].map(n => `<option ${n === r.stars ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+    <label>Review<textarea name="review" rows="4" required>${esc(r.review)}</textarea></label>
+    <div class="checks"><label><input type="checkbox" name="top" ${r.top ? 'checked' : ''}> Show on home page</label>
+      <label><input type="checkbox" name="visible" ${r.visible ? 'checked' : ''}> Visible</label></div>`,
+    async v => { await api(id ? '/admin/reviews/' + id : '/admin/reviews', id ? 'PUT' : 'POST', { ...v, stars: +v.stars }); toast('Review saved'); vReviews(); });
+}
+async function delReview(id) { if (!confirm('Delete this review?')) return; await api('/admin/reviews/' + id, 'DELETE'); toast('Review deleted'); vReviews(); }
+
+async function vAnalytics() {
+  const a = await api('/admin/analytics?days=' + S.days), t = a.totals, max = Math.max(1, ...a.daily.map(d => d.views));
+  const rate = t.product_views ? Math.round(t.order_clicks / t.product_views * 100) + '%' : '—';
+  const list = (rows, k) => rows.length ? rows.map(r => `<div class="li"><span>${esc(r[k] || 'Unknown')}</span><b>${r.n}</b></div>`).join('') : '<p class="mute">Nothing yet</p>';
+  $('#view').innerHTML = `<div class="head"><h1>Analytics</h1>
+      <select style="width:auto" onchange="S.days=this.value;vAnalytics()">${[7, 30, 90].map(d => `<option value="${d}" ${d == S.days ? 'selected' : ''}>Last ${d} days</option>`).join('')}</select></div>
+    <div class="stats">
+      <div class="stat"><b>${t.visitors}</b>Visitors</div><div class="stat"><b>${t.page_views}</b>Page views</div>
+      <div class="stat"><b>${t.product_views}</b>Product views</div><div class="stat"><b>${t.order_clicks}</b>Order clicks</div>
+      <div class="stat"><b>${rate}</b>Views that led to an order click</div></div>
+    <h2>Page views per day</h2>
+    <div class="bars" role="img" aria-label="Page views per day">${a.daily.map(d => `<i style="height:${Math.max(3, d.views / max * 100)}%" title="${esc(d.day)}: ${d.views} views, ${d.visitors} visitors"></i>`).join('') || '<span class="mute">No visits recorded yet</span>'}</div>
+    <h2>Products</h2>
+    <table><tr><th>Piece</th><th>Views</th><th>Order clicks</th><th>Rate</th></tr>${a.products.map(p => `<tr><td>${esc(p.name)}</td><td>${p.views}</td><td>${p.order_clicks}</td><td>${p.views ? Math.round(p.order_clicks / p.views * 100) + '%' : '—'}</td></tr>`).join('') || '<tr><td colspan="4" class="mute">No products yet</td></tr>'}</table>
+    <div class="cols"><div><h2>Top pages</h2>${list(a.pages, 'path')}</div><div><h2>Where visitors come from</h2>${list(a.referrers, 'referrer')}</div>
+      <div><h2>Devices</h2>${list(a.devices, 'device')}</div><div><h2>Countries</h2>${list(a.countries, 'country')}</div></div>
+    <p class="mute" style="margin-top:22px">You're signed in, so your own visits aren't counted. For other visitors, type <code>ghostmode = true</code> in the browser console to pause tracking until the next refresh.</p>`;
+}
+
+async function vGallery() {
+  S.gallery = await api('/admin/gallery');
+  $('#view').innerHTML = `<div class="head"><h1>Gallery</h1></div>
+    <p class="mute" style="margin-bottom:14px;max-width:640px">Studio moments and finished work for the Gallery page. Newest photos appear first.</p>
+    <label class="row" style="margin-bottom:14px">Add photos<input type="file" id="gpick" accept="image/jpeg,image/png,image/webp" multiple style="max-width:320px;margin:0"></label>` +
+    (S.gallery.map(g => `<form class="row" onsubmit="saveGal(event,${g.id})"><div class="thumb"><img src="${esc(g.url)}" alt=""></div>
+      <input name="caption" class="grow" value="${esc(g.caption)}" placeholder="Caption (optional)" maxlength="120" aria-label="Caption">
+      <button class="ghost">Save</button><button type="button" class="ghost" onclick="galVis(${g.id})">${g.visible ? 'Hide' : 'Show'}</button>
+      <button type="button" class="ghost danger" onclick="delGal(${g.id})">Delete</button></form>`).join('')
+    || '<p class="mute empty">No photos yet. Add some to show your studio.</p>');
+  $('#gpick').onchange = async e => {
+    for (const f of e.target.files) { const fd = new FormData(); fd.append('file', await squash(f), 'photo.webp'); await api('/admin/gallery', 'POST', { url: (await api('/admin/upload', 'POST', fd)).url }); }
+    toast('Photos added'); vGallery();
+  };
+}
+const gal = id => S.gallery.find(x => x.id === id);
+async function saveGal(e, id) { e.preventDefault(); const g = gal(id); await api('/admin/gallery/' + id, 'PUT', { caption: e.target.caption.value, visible: g.visible, sort: g.sort }); toast('Caption saved'); }
+async function galVis(id) { const g = gal(id); await api('/admin/gallery/' + id, 'PUT', { caption: g.caption, visible: !g.visible, sort: g.sort }); vGallery(); }
+async function delGal(id) { if (!confirm('Delete this photo? This can\'t be undone.')) return; await api('/admin/gallery/' + id, 'DELETE'); toast('Photo deleted'); vGallery(); }
+
+const SAMPLE = { name: 'Wildflower Reverie', id: 12 };
+const fill = (t, p = SAMPLE) => String(t).replace(/\{\{\s*product name\s*\}\}/gi, p.name).replace(/\{\{\s*product id\s*\}\}/gi, p.id);
+const PLATFORMS = [
+  { k: 'wa', name: 'WhatsApp', field: 'whatsapp', label: 'WhatsApp number with country code, digits only', mode: 'numeric',
+    note: 'When a visitor taps the button, WhatsApp opens with this message already typed in.' },
+  { k: 'ig', name: 'Instagram', field: 'instagram_handle', label: 'Instagram handle, without @', mode: 'text',
+    note: "Instagram links can't carry pre-filled text. When a visitor taps the button, this message is copied to their clipboard and the chat opens, so they only need to paste it." },
+];
+async function vPrefill() {
+  const s = await api('/admin/settings');
+  $('#view').innerHTML = `<div class="head"><h1>Prefill messages</h1></div>
+    <p class="mute" style="margin-bottom:18px;max-width:640px">Write the message visitors send when they order. Use <code>{{Product Name}}</code> and <code>{{Product ID}}</code> and they are replaced with the piece the visitor is looking at. If both buttons are off, visitors have no way to contact you from the site.</p>
+    <form id="pf">` + PLATFORMS.map(p => `<section class="card"><h2>${p.name}</h2>
+      <label style="font-weight:400"><input type="checkbox" name="${p.k}_enabled" ${s[p.k + '_enabled'] === '1' ? 'checked' : ''}> Show the order button for ${p.name}</label>
+      <label>${p.label}<input name="${p.field}" inputmode="${p.mode}" value="${esc(s[p.field])}"></label>
+      <label>Message<textarea id="${p.k}_t" name="${p.k}_template" rows="3" maxlength="600" required>${esc(s[p.k + '_template'])}</textarea></label>
+      <div class="chips"><button type="button" class="ghost" onclick="ins('${p.k}_t','{{Product Name}}')">Add product name</button>
+        <button type="button" class="ghost" onclick="ins('${p.k}_t','{{Product ID}}')">Add product ID</button></div>
+      <p class="mute" style="margin-bottom:10px">${p.note}</p>
+      <b>Preview with a sample product</b><div class="preview" id="${p.k}_p"></div></section>`).join('') +
+    `<button class="btn">Save messages</button></form>`;
+  const prev = () => PLATFORMS.forEach(p => $('#' + p.k + '_p').textContent = fill($('#' + p.k + '_t').value));
+  $('#pf').oninput = prev; prev();
+  $('#pf').onsubmit = async e => {
+    e.preventDefault(); const v = vals(e.target);
+    if (v.wa_enabled && !v.whatsapp.replace(/\D/g, '')) return toast('Add a WhatsApp number to show that button', 1);
+    if (v.ig_enabled && !v.instagram_handle.trim()) return toast('Add an Instagram handle to show that button', 1);
+    await api('/admin/settings', 'PUT', v); toast('Messages saved');
+  };
+}
+function ins(id, tok) { const t = $('#' + id); t.setRangeText(tok, t.selectionStart, t.selectionEnd, 'end'); t.focus(); t.dispatchEvent(new Event('input', { bubbles: true })); }
+
+async function vSettings() {
+  const s = await api('/admin/settings');
+  $('#view').innerHTML = `<div class="head"><h1>Settings</h1></div><form id="sf" style="max-width:560px">
+    <label>Announcement banner (leave empty to hide)<input name="announcement" value="${esc(s.announcement)}"></label>
+    <label>Scrolling ribbon, one line per message<textarea name="ribbon" rows="6">${esc(s.ribbon)}</textarea></label>
+    <button class="btn">Save settings</button></form>`;
+  $('#sf').onsubmit = async e => { e.preventDefault(); await api('/admin/settings', 'PUT', vals(e.target)); toast('Settings saved'); };
+}
+
+async function vTeam() {
+  S.users = await api('/admin/users');
+  $('#view').innerHTML = `<div class="head"><h1>Team</h1><button class="btn" onclick="addUser()">Add manager</button></div>` +
+    S.users.map(u => `<div class="row"><div class="grow"><b>${esc(u.username)}</b> <span class="pill">${esc(u.role)}</span>${u.active ? '' : '<span class="pill off">Deactivated</span>'}</div>
+      <div class="acts"><button class="ghost" onclick="resetPw(${u.id})">Reset password</button>
+      <button class="ghost ${u.active ? 'danger' : ''}" onclick="setActive(${u.id},${!u.active})">${u.active ? 'Deactivate' : 'Reactivate'}</button></div></div>`).join('');
+}
+const pwField = `<label>Password (10 to 64 characters)<input name="password" type="password" minlength="10" maxlength="64" autocomplete="new-password" required></label>`;
+function addUser() { form('Add manager', `<label>Username<input name="username" pattern="[\\w.\\-]{3,32}" required></label>${pwField}`, async v => { await api('/admin/users', 'POST', v); toast('Manager added'); vTeam(); }); }
+function resetPw(id) { form('Reset password', pwField + '<p class="mute">They will be signed out everywhere.</p>', async v => { await api('/admin/users/' + id, 'PATCH', { password: v.password }); toast('Password reset'); }); }
+async function setActive(id, active) { await api('/admin/users/' + id, 'PATCH', { active }); toast(active ? 'Reactivated' : 'Deactivated'); vTeam(); }
+</script>
+</body>
+</html>
