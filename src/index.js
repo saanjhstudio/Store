@@ -1,11 +1,9 @@
 import { Hono } from 'hono';
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { createClient } from '@libsql/client/web';
-import bcrypt from 'bcryptjs';
 import { ensureSchema } from './schema.js';
 
 const SESSION_DAYS = 7;
-const BCRYPT_COST = 10;
 const EVENT_TYPES = new Set(['page_view', 'product_view', 'order_click', 'social_click']);
 const SETTING_KEYS = ['ribbon', 'announcement', 'instagram_handle', 'whatsapp', 'wa_enabled', 'ig_enabled', 'wa_template', 'ig_template'];
 const TOGGLES = ['wa_enabled', 'ig_enabled'];
@@ -23,6 +21,43 @@ const plain = r => r.rows.map(row => ({ ...row }));
 const int = (v, d = 0) => (Number.isFinite(+v) ? Math.trunc(+v) : d);
 const flag = v => (v ? 1 : 0);
 const cacheable = c => c.header('Cache-Control', 'public, max-age=30, s-maxage=60');
+
+class AuthDown extends Error {}
+const DUMMY_HASH = '$2b$12$4vhDvyUXzqOWA.jhVaFt9eZEQ3iMjTKUbc0ksWgT3005Fgl7cYjn.';
+
+async function authCall(c, path, body) {
+  try {
+    const r = await fetch(c.env.AUTH_URL.replace(/\/+$/, '') + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${c.env.AUTH_SECRET}` },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(50000),
+    });
+    if (!r.ok) throw new Error(`status ${r.status}`);
+    return await r.json();
+  } catch (e) {
+    console.error('auth service:', e.message);
+    throw new AuthDown();
+  }
+}
+
+async function hashPassword(c, password) {
+  const { hash } = await authCall(c, '/hash', { password });
+  if (!hash) throw new AuthDown();
+  return hash;
+}
+
+async function hmacOk(secret, msg, sigHex) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+  const sig = new Uint8Array(String(sigHex).match(/../g)?.map(h => parseInt(h, 16)) || []);
+  return crypto.subtle.verify('HMAC', key, sig, new TextEncoder().encode(msg));
+}
+
+async function checkPassword(c, username, password, hash) {
+  const nonce = rand();
+  const r = await authCall(c, '/verify', { password: password.slice(0, 64), hash, nonce, username });
+  return r.ok === true && Number(r.exp) > Date.now() / 1000 && hmacOk(c.env.AUTH_SECRET, `${nonce}|${username}|${r.exp}|1`, r.sig);
+}
 
 const app = new Hono();
 
@@ -133,7 +168,7 @@ app.post('/api/setup', async c => {
   if ((await db.execute('SELECT COUNT(*) n FROM users')).rows[0].n > 0) return c.json({ error: 'Already set up' }, 409);
   if (!/^[\w.-]{3,32}$/.test(username || '') || (password || '').length < 10 || password.length > 64)
     return c.json({ error: 'Username 3-32 chars; password 10-64 chars' }, 400);
-  await db.execute({ sql: "INSERT INTO users(username, password_hash, role) VALUES (?,?,'owner')", args: [username, await bcrypt.hash(password, BCRYPT_COST)] });
+  await db.execute({ sql: "INSERT INTO users(username, password_hash, role) VALUES (?,?,'owner')", args: [username, await hashPassword(c, password)] });
   return c.json({ ok: true });
 });
 
@@ -150,8 +185,9 @@ app.post('/api/login', async c => {
   if (n >= 5) return c.json({ error: 'Too many attempts. Try again in 15 minutes.' }, 429);
 
   const u = (await db.execute({ sql: 'SELECT * FROM users WHERE username = ? AND active = 1', args: [String(username)] })).rows[0];
-  // Same bcrypt work whether or not the user exists, so timing doesn't reveal valid usernames.
-  const ok = u ? await bcrypt.compare(String(password).slice(0, 64), u.password_hash) : (await bcrypt.hash('x', BCRYPT_COST), false);
+  // Verify against a dummy hash when the user doesn't exist, so timing doesn't reveal valid usernames.
+  const verified = await checkPassword(c, String(username), String(password), u ? u.password_hash : DUMMY_HASH);
+  const ok = verified && !!u;
   if (!ok) {
     await db.execute({ sql: 'INSERT INTO login_attempts(ip) VALUES (?)', args: [ip] });
     return c.json({ error: 'Invalid username or password' }, 401);
@@ -301,7 +337,7 @@ app.post('/api/admin/users', async c => {
   if (!/^[\w.-]{3,32}$/.test(username || '') || (password || '').length < 10 || password.length > 64)
     return c.json({ error: 'Username 3-32 chars; password 10-64 chars' }, 400);
   try {
-    await c.get('db').execute({ sql: "INSERT INTO users(username, password_hash, role) VALUES (?,?,'manager')", args: [username, await bcrypt.hash(password, BCRYPT_COST)] });
+    await c.get('db').execute({ sql: "INSERT INTO users(username, password_hash, role) VALUES (?,?,'manager')", args: [username, await hashPassword(c, password)] });
   } catch { return c.json({ error: 'Username already exists' }, 409); }
   return c.json({ ok: true });
 });
@@ -320,7 +356,7 @@ app.patch('/api/admin/users/:id', async c => {
   if (b.password) {
     if (b.password.length < 10 || b.password.length > 64) return c.json({ error: 'Password 10-64 chars' }, 400);
     await db.batch([
-      { sql: 'UPDATE users SET password_hash = ? WHERE id = ?', args: [await bcrypt.hash(b.password, BCRYPT_COST), id] },
+      { sql: 'UPDATE users SET password_hash = ? WHERE id = ?', args: [await hashPassword(c, b.password), id] },
       { sql: 'DELETE FROM sessions WHERE user_id = ?', args: [id] },
     ]);
   }
@@ -346,6 +382,10 @@ app.get('/api/admin/analytics', async c => {
 });
 
 app.notFound(c => c.json({ error: 'Not found' }, 404));
-app.onError((e, c) => { console.error(e); return c.json({ error: 'Server error' }, 500); });
+app.onError((e, c) => {
+  if (e instanceof AuthDown) return c.json({ error: 'The sign-in service is waking up. Wait a few seconds and try again.' }, 503);
+  console.error(e);
+  return c.json({ error: 'Server error' }, 500);
+});
 
 export default app;
