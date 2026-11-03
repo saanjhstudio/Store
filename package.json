@@ -1,0 +1,13 @@
+{
+  "name": "saanjh-studio",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@libsql/client": "^0.15.0",
+    "bcryptjs": "^3.0.2",
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
