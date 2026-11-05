@@ -56,6 +56,8 @@ dialog::backdrop{background:rgba(20,8,10,.55)}
 .preview{background:var(--bg2);border-radius:8px;padding:10px 12px;white-space:pre-wrap;margin:4px 0 0}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 10px}
 code{background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:13px}
+.meter{height:10px;background:var(--bg2);border-radius:99px;overflow:hidden;margin:12px 0}
+.meter i{display:block;height:100%;background:var(--rose);border-radius:99px}.meter i.hot{background:var(--bad)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:22px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
 .stat b{display:block;font:500 30px 'Playfair Display',serif;color:var(--rose)}
@@ -102,7 +104,7 @@ th{font-weight:600;color:var(--mute);font-size:13px}
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-const S = { user: null, tags: [], products: [], days: 30 };
+const S = { user: null, tags: [], products: [], days: 30, store: 'r2' };
 
 async function api(path, method = 'GET', body) {
   const o = { method, headers: {} };
@@ -134,12 +136,12 @@ function form(title, body, submit, after) {
   d.showModal();
 }
 
-const VIEWS = { products: vProducts, tags: vTags, gallery: vGallery, reviews: vReviews, prefill: vPrefill, analytics: vAnalytics, settings: vSettings, team: vTeam };
-const LABELS = { products: 'Products', tags: 'Item tags', gallery: 'Gallery', reviews: 'Reviews', prefill: 'Prefill messages', analytics: 'Analytics', settings: 'Settings', team: 'Team' };
+const VIEWS = { products: vProducts, tags: vTags, gallery: vGallery, reviews: vReviews, prefill: vPrefill, analytics: vAnalytics, storage: vStorage, settings: vSettings, team: vTeam };
+const LABELS = { products: 'Products', tags: 'Item tags', gallery: 'Gallery', reviews: 'Reviews', prefill: 'Prefill messages', analytics: 'Analytics', storage: 'Storage', settings: 'Settings', team: 'Team' };
 $('#tabs').innerHTML = Object.keys(VIEWS).map(k => `<a href="#${k}" data-t="${k}">${LABELS[k]}</a>`).join('');
 
 function showLogin() { $('#app').hidden = true; $('#login').hidden = false; S.user = null; }
-function showApp() { $('#login').hidden = true; $('#app').hidden = false; $('#who').textContent = S.user.username; route(); }
+function showApp() { $('#login').hidden = true; $('#app').hidden = false; $('#who').textContent = S.user.username; S.r2 = !!S.user.r2; if (!S.r2) S.store = 'turso'; route(); }
 async function route() {
   const t = location.hash.slice(1) in VIEWS ? location.hash.slice(1) : 'products';
   document.querySelectorAll('#tabs a').forEach(a => a.classList.toggle('on', a.dataset.t === t));
@@ -203,7 +205,7 @@ function editProduct(id) {
     <div class="checks"><label><input type="checkbox" name="inStock" ${p.inStock ? 'checked' : ''}> In stock</label>
       <label><input type="checkbox" name="featured" ${p.featured ? 'checked' : ''}> Show on home page</label>
       <label><input type="checkbox" name="visible" ${p.visible ? 'checked' : ''}> Visible in shop</label></div>
-    <div><b>Photos</b><div class="imgs" id="imgs"></div><input type="file" id="pick" accept="image/jpeg,image/png,image/webp" multiple></div>`,
+    <div><b>Photos</b><div class="imgs" id="imgs"></div><input type="file" id="pick" accept="image/jpeg,image/png,image/webp" multiple>${storePick()}</div>`,
     async v => {
       await api(id ? '/admin/products/' + id : '/admin/products', id ? 'PUT' : 'POST', { ...v, price: +v.price, images: imgs, sort: p.sort || 0 });
       toast('Product saved'); vProducts();
@@ -218,7 +220,7 @@ function editProduct(id) {
       };
       $('#pick').onchange = async e => {
         for (const f of e.target.files) {
-          try { const fd = new FormData(); fd.append('file', await squash(f), 'photo.webp'); imgs.push((await api('/admin/upload', 'POST', fd)).url); paint(); }
+          try { const fd = new FormData(); fd.append('file', await squash(f), 'photo.webp'); fd.append('store', storeVal()); imgs.push((await api('/admin/upload', 'POST', fd)).url); paint(); }
           catch (err) { $('#ferr').textContent = err.message; }
         }
         e.target.value = '';
@@ -290,14 +292,14 @@ async function vGallery() {
   S.gallery = await api('/admin/gallery');
   $('#view').innerHTML = `<div class="head"><h1>Gallery</h1></div>
     <p class="mute" style="margin-bottom:14px;max-width:640px">Studio moments and finished work for the Gallery page. Newest photos appear first.</p>
-    <label class="row" style="margin-bottom:14px">Add photos<input type="file" id="gpick" accept="image/jpeg,image/png,image/webp" multiple style="max-width:320px;margin:0"></label>` +
+    ${storePick()}<label class="row" style="margin-bottom:14px">Add photos<input type="file" id="gpick" accept="image/jpeg,image/png,image/webp" multiple style="max-width:320px;margin:0"></label>` +
     (S.gallery.map(g => `<form class="row" onsubmit="saveGal(event,${g.id})"><div class="thumb"><img src="${esc(g.url)}" alt=""></div>
       <input name="caption" class="grow" value="${esc(g.caption)}" placeholder="Caption (optional)" maxlength="120" aria-label="Caption">
       <button class="ghost">Save</button><button type="button" class="ghost" onclick="galVis(${g.id})">${g.visible ? 'Hide' : 'Show'}</button>
       <button type="button" class="ghost danger" onclick="delGal(${g.id})">Delete</button></form>`).join('')
     || '<p class="mute empty">No photos yet. Add some to show your studio.</p>');
   $('#gpick').onchange = async e => {
-    for (const f of e.target.files) { const fd = new FormData(); fd.append('file', await squash(f), 'photo.webp'); await api('/admin/gallery', 'POST', { url: (await api('/admin/upload', 'POST', fd)).url }); }
+    for (const f of e.target.files) { const fd = new FormData(); fd.append('file', await squash(f), 'photo.webp'); fd.append('store', storeVal()); await api('/admin/gallery', 'POST', { url: (await api('/admin/upload', 'POST', fd)).url }); }
     toast('Photos added'); vGallery();
   };
 }
@@ -337,6 +339,29 @@ async function vPrefill() {
   };
 }
 function ins(id, tok) { const t = $('#' + id); t.setRangeText(tok, t.selectionStart, t.selectionEnd, 'end'); t.focus(); t.dispatchEvent(new Event('input', { bubbles: true })); }
+
+const storeVal = () => $('#store')?.value || 'r2';
+const storePick = () => `<div style="margin:10px 0 14px"><label style="display:inline-block;margin:0;font-weight:400">Save new photos to
+  <select id="store" style="width:auto;margin-left:6px" onchange="S.store=this.value"><option value="r2" ${S.r2 ? '' : 'disabled'} ${S.store === 'r2' ? 'selected' : ''}>R2 ${S.r2 ? '(recommended)' : '(not connected)'}</option><option value="turso" ${S.store === 'turso' ? 'selected' : ''}>Turso database</option></select></label></div>`;
+
+const fmtBytes = b => b >= 1073741824 ? (b / 1073741824).toFixed(2) + ' GB' : b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB';
+async function vStorage() {
+  const s = await api('/admin/storage');
+  const meter = (name, d, note) => { const pct = Math.min(100, d.bytes / d.limit * 100);
+    return `<section class="card"><h2>${name}</h2><div class="meter" role="img" aria-label="${pct.toFixed(1)} percent used"><i class="${pct > 85 ? 'hot' : ''}" style="width:${d.bytes ? Math.max(pct, 1) : 0}%"></i></div>
+      <p><b>${fmtBytes(d.bytes)}</b> of ${fmtBytes(d.limit)} used (${pct.toFixed(1)}%) &middot; ${d.files} photo${d.files === 1 ? '' : 's'}</p><p class="mute">${note}</p></section>`; };
+  $('#view').innerHTML = `<div class="head"><h1>Storage</h1></div>
+    <p class="mute" style="margin-bottom:16px;max-width:640px">Photo storage used by uploads from this panel, added up from file sizes. Pick R2 or Turso each time you upload.</p>` +
+    (S.r2 ? meter('R2', s.r2, 'Free tier includes 10 GB. Fast and cached at the edge.') : '<section class="card"><h2>R2</h2><p class="mute">Not connected yet. Photos can still be saved to the Turso database.</p></section>') +
+    meter('Turso database', s.turso, `Photos stored in the database.${s.tursoTotal ? ` The whole database, including products and analytics, is ${fmtBytes(s.tursoTotal)}.` : ''} Check your Turso plan for its real limit.`) +
+    `<button class="btn" onclick="cleanFiles()">Delete unused photos</button>
+    <p class="mute" style="margin-top:8px;max-width:640px">Removes photos that aren't used by any product or gallery entry, such as uploads you never saved. Photos from the last hour are kept.</p>`;
+}
+async function cleanFiles() {
+  if (!confirm('Delete every photo that is not used by a product or the gallery?')) return;
+  const r = await api('/admin/storage/cleanup', 'POST');
+  toast(r.removed ? `Removed ${r.removed} photo${r.removed === 1 ? '' : 's'}, freed ${fmtBytes(r.bytes)}` : 'Nothing to clean up'); vStorage();
+}
 
 async function vSettings() {
   const s = await api('/admin/settings');
