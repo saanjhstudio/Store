@@ -22,6 +22,15 @@ const int = (v, d = 0) => (Number.isFinite(+v) ? Math.trunc(+v) : d);
 const flag = v => (v ? 1 : 0);
 const cacheable = c => c.header('Cache-Control', 'public, max-age=30, s-maxage=60');
 
+const makeDb = env => createClient({ url: env.TURSO_DATABASE_URL, authToken: env.TURSO_AUTH_TOKEN });
+const STORAGE_LIMITS = { r2: 10 * 1024 ** 3, turso: 5 * 1024 ** 3 };
+
+async function removeFile(c, url) {
+  const key = String(url).replace('/img/', '');
+  if (!key.startsWith('t_') && c.env.IMAGES) await c.env.IMAGES.delete(key);
+  await c.get('db').execute({ sql: 'DELETE FROM files WHERE key = ?', args: [key] });
+}
+
 class AuthDown extends Error {}
 const DUMMY_HASH = '$2b$12$4vhDvyUXzqOWA.jhVaFt9eZEQ3iMjTKUbc0ksWgT3005Fgl7cYjn.';
 
@@ -62,7 +71,7 @@ async function checkPassword(c, username, password, hash) {
 const app = new Hono();
 
 app.use('/api/*', async (c, next) => {
-  const db = createClient({ url: c.env.TURSO_DATABASE_URL, authToken: c.env.TURSO_AUTH_TOKEN });
+  const db = makeDb(c.env);
   await ensureSchema(db);
   c.set('db', db);
   await next();
@@ -132,15 +141,27 @@ app.get('/api/config', async c => {
 });
 
 app.get('/img/:key', async c => {
-  const o = await c.env.IMAGES.get(c.req.param('key'));
-  if (!o) return c.notFound();
-  return new Response(o.body, {
-    headers: {
-      'Content-Type': o.httpMetadata?.contentType || 'application/octet-stream',
-      'Cache-Control': 'public, max-age=31536000, immutable',
-      'X-Content-Type-Options': 'nosniff',
-    },
+  const cache = caches.default;
+  const hit = await cache.match(c.req.raw);
+  if (hit) return hit;
+  const key = c.req.param('key');
+  let body, type;
+  if (key.startsWith('t_')) {
+    const db = makeDb(c.env);
+    await ensureSchema(db);
+    const row = (await db.execute({ sql: "SELECT mime, data FROM files WHERE key = ? AND store = 'turso'", args: [key] })).rows[0];
+    if (!row) return c.notFound();
+    body = row.data; type = row.mime;
+  } else {
+    const o = await c.env.IMAGES?.get(key);
+    if (!o) return c.notFound();
+    body = o.body; type = o.httpMetadata?.contentType;
+  }
+  const res = new Response(body, {
+    headers: { 'Content-Type': type || 'application/octet-stream', 'Cache-Control': 'public, max-age=31536000, immutable', 'X-Content-Type-Options': 'nosniff' },
   });
+  c.executionCtx.waitUntil(cache.put(c.req.raw, res.clone()));
+  return res;
 });
 
 app.post('/api/track', async c => {
@@ -199,7 +220,7 @@ app.post('/api/login', async c => {
     args: [await sha256(token), u.id, `+${SESSION_DAYS} days`],
   });
   setCookie(c, 'sid', token, { httpOnly: true, secure: true, sameSite: 'Strict', path: '/', maxAge: SESSION_DAYS * 86400 });
-  return c.json({ username: u.username, role: u.role });
+  return c.json({ username: u.username, role: u.role, r2: !!c.env.IMAGES });
 });
 
 app.post('/api/logout', async c => {
@@ -211,7 +232,7 @@ app.post('/api/logout', async c => {
 
 app.get('/api/me', async c => {
   const u = await getUser(c);
-  return u ? c.json(u) : c.json({ error: 'Unauthorized' }, 401);
+  return u ? c.json({ ...u, r2: !!c.env.IMAGES }) : c.json({ error: 'Unauthorized' }, 401);
 });
 
 app.use('/api/admin/*', originCheck, requireManager);
@@ -232,10 +253,12 @@ async function saveProduct(c, id) {
     return c.json({ error: /UNIQUE/.test(e.message) ? 'That slug is already used' : 'Save failed' }, 409);
   }
   const images = (b.images || []).filter(u => /^\/img\/[\w.-]+$/.test(u));
+  const before = (await db.execute({ sql: 'SELECT url FROM product_images WHERE product_id = ?', args: [id] })).rows.map(r => r.url);
   await db.batch([
     { sql: 'DELETE FROM product_images WHERE product_id = ?', args: [id] },
     ...images.map((url, i) => ({ sql: 'INSERT INTO product_images(product_id, url, sort) VALUES (?,?,?)', args: [id, url, i] })),
   ]);
+  await Promise.all(before.filter(u => !images.includes(u)).map(u => removeFile(c, u)));
   return c.json({ id, slug });
 }
 app.get('/api/admin/products', async c => c.json(await listProducts(c.get('db'), true)));
@@ -248,7 +271,7 @@ app.delete('/api/admin/products/:id', async c => {
     { sql: 'DELETE FROM product_images WHERE product_id = ?', args: [id] },
     { sql: 'DELETE FROM products WHERE id = ?', args: [id] },
   ]);
-  await Promise.all(imgs.rows.map(r => c.env.IMAGES.delete(String(r.url).replace('/img/', ''))));
+  await Promise.all(imgs.rows.map(r => removeFile(c, r.url)));
   return c.json({ ok: true });
 });
 
@@ -306,7 +329,7 @@ app.delete('/api/admin/gallery/:id', async c => {
   const db = c.get('db'), id = int(c.req.param('id'));
   const row = (await db.execute({ sql: 'SELECT url FROM gallery WHERE id = ?', args: [id] })).rows[0];
   await db.execute({ sql: 'DELETE FROM gallery WHERE id = ?', args: [id] });
-  if (row) await c.env.IMAGES.delete(String(row.url).replace('/img/', ''));
+  if (row) await removeFile(c, row.url);
   return c.json({ ok: true });
 });
 
@@ -322,13 +345,38 @@ app.put('/api/admin/settings', async c => {
 });
 
 app.post('/api/admin/upload', async c => {
-  const file = (await c.req.formData()).get('file');
+  const form = await c.req.formData();
+  const file = form.get('file');
+  const store = form.get('store') === 'turso' ? 'turso' : 'r2';
+  if (store === 'r2' && !c.env.IMAGES) return c.json({ error: 'R2 is not connected yet. Choose Turso, or add the R2 bucket.' }, 400);
   const ext = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[file?.type];
   if (!ext) return c.json({ error: 'Only JPG, PNG or WebP images' }, 400);
-  if (file.size > 5 * 1024 * 1024) return c.json({ error: 'Max 5 MB per image' }, 400);
-  const key = `${crypto.randomUUID()}.${ext}`;
-  await c.env.IMAGES.put(key, file.stream(), { httpMetadata: { contentType: file.type } });
+  const maxMb = store === 'turso' ? 2 : 5;
+  if (file.size > maxMb * 1024 * 1024) return c.json({ error: `Max ${maxMb} MB per image for ${store === 'turso' ? 'Turso' : 'R2'}` }, 400);
+  const id = crypto.randomUUID();
+  const key = store === 'turso' ? `t_${id}.${ext}` : `${id}.${ext}`;
+  if (store === 'r2') await c.env.IMAGES.put(key, file.stream(), { httpMetadata: { contentType: file.type } });
+  await c.get('db').execute({
+    sql: 'INSERT INTO files(key, store, mime, size, data) VALUES (?,?,?,?,?)',
+    args: [key, store, file.type, file.size, store === 'turso' ? await file.arrayBuffer() : null],
+  });
   return c.json({ url: `/img/${key}` });
+});
+
+app.get('/api/admin/storage', async c => {
+  const db = c.get('db');
+  const rows = plain(await db.execute('SELECT store, COUNT(*) files, COALESCE(SUM(size), 0) bytes FROM files GROUP BY store'));
+  const get = st => ({ files: 0, bytes: 0, ...rows.find(r => r.store === st), limit: STORAGE_LIMITS[st] });
+  let total = null;
+  try { total = Number((await db.execute('SELECT (SELECT page_count FROM pragma_page_count) * (SELECT page_size FROM pragma_page_size) AS b')).rows[0].b); } catch {}
+  return c.json({ r2: get('r2'), turso: get('turso'), tursoTotal: total });
+});
+
+app.post('/api/admin/storage/cleanup', async c => {
+  const rows = (await c.get('db').execute(`SELECT key, size FROM files WHERE created_at < datetime('now', '-1 hour')
+    AND '/img/' || key NOT IN (SELECT url FROM product_images) AND '/img/' || key NOT IN (SELECT url FROM gallery)`)).rows;
+  for (const r of rows) await removeFile(c, '/img/' + r.key);
+  return c.json({ removed: rows.length, bytes: rows.reduce((n, r) => n + Number(r.size), 0) });
 });
 
 app.get('/api/admin/users', async c => c.json(plain(await c.get('db').execute('SELECT id, username, role, active, created_at FROM users ORDER BY id'))));
