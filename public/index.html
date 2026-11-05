@@ -20,7 +20,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font:300 15px/1.7 Raleway,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
-main{flex:1}
+main{flex:1;width:100%}
 img{display:block;max-width:100%}a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 :focus-visible{outline:2px solid var(--rose);outline-offset:3px}
@@ -125,6 +125,7 @@ footer{margin-top:72px;background:var(--bg2);border-top:1px solid var(--bd);padd
 .fg{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:40px;margin-bottom:32px}
 @media(max-width:768px){.fg{grid-template-columns:1fr 1fr;gap:28px}.fg>div:first-child{grid-column:1/-1}}
 footer h4{font-size:13px;font-weight:600;color:var(--rose);margin-bottom:12px}
+footer ul+h4{margin-top:22px}
 footer ul{list-style:none;display:flex;flex-direction:column}
 footer li a{display:inline-block;padding:6px 0;font-size:14px;color:var(--tx3)}footer li a:hover{color:var(--rose)}
 .fb{font:500 19px 'Playfair Display',serif;margin-bottom:8px;display:flex;align-items:center;gap:10px}.fb img{border-radius:50%;object-fit:cover}.fd{font-size:14px;color:var(--tx3);max-width:340px}
@@ -156,7 +157,7 @@ footer li a{display:inline-block;padding:6px 0;font-size:14px;color:var(--tx3)}f
       <div><p class="fb"><img src="/assets/images/logo.png" alt="" width="32" height="32" onerror="this.remove()">Saanjh Studio</p><p class="fd">Handcrafted art, necklaces, keychains and decor. Made with love in India, and named after the quiet magic of dusk.</p></div>
       <div><h4>Explore</h4><ul>
         <li><a href="/" data-r>Home</a></li><li><a href="/shop" data-r>Shop</a></li><li><a href="/gallery" data-r>Gallery</a></li><li><a href="/about" data-r>About</a></li><li><a href="/reviews" data-r>Reviews</a></li></ul></div>
-      <div><h4>Get in touch</h4><ul id="fcontact"><li><a href="/shop" data-r>Browse the shop</a></li></ul></div>
+      <div><h4>Get in touch</h4><ul id="fcontact"><li><a href="/shop" data-r>Browse the shop</a></li></ul><h4>Team</h4><ul><li><a href="/admin">Admin panel</a></li></ul></div>
     </div>
     <div class="fine"><span>© 2026 Saanjh Studio. Made with ♥ in India.</span><span>Every piece is an original, handmade work.</span></div>
   </div>
@@ -171,7 +172,7 @@ const inr = n => '₹' + n.toLocaleString('en-IN');
 const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
 const fill = (t, p) => String(t).replace(/\{\{\s*product name\s*\}\}/gi, p.name).replace(/\{\{\s*product id\s*\}\}/gi, p.id);
 const DEF_MSG = "Hi Saanjh Studio! I'd like to order {{Product Name}} (Product ID: {{Product ID}}). Is it still available?";
-const D = { products: [], tags: [], reviews: [], gallery: [], cfg: {} };
+const D = { products: [], tags: [], reviews: [], gallery: [], cfg: {}, ready: false };
 let sortBy = 'default', tt;
 const LB = '<span class="lb"><i></i></span>', DONE = 'onload="imgDone(this)" onerror="imgDone(this)"';
 const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('go'); io.unobserve(e.target); } }), { rootMargin: '150px' }) : null;
@@ -272,13 +273,18 @@ const gallery = () => {
 };
 const notFound = () => [`<div class="empty"><h1>We couldn't find that page</h1><p style="margin:12px 0 22px">It may have moved, or the piece may no longer be listed.</p><a class="btn" href="/shop" data-r>Browse the shop</a></div>`, 'Page not found | Saanjh Studio'];
 
+function markNav() {
+  const path = location.pathname.replace(/\/+$/, '') || '/';
+  document.querySelectorAll('.nav a').forEach(a => a.toggleAttribute('aria-current', a.pathname === (path.startsWith('/product') ? '/shop' : path)));
+}
 function route(keep) {
+  markNav();
+  if (!D.ready) { load(); return; }
   const path = location.pathname.replace(/\/+$/, '') || '/', q = new URLSearchParams(location.search); let m;
   const [html, title, desc, pid] = path === '/' ? home() : path === '/shop' ? shop(q.get('tag')) : path === '/gallery' ? gallery() : path === '/about' ? about() : path === '/reviews' ? reviews()
     : (m = path.match(/^\/product\/([\w-]+)$/)) ? product(m[1]) : notFound();
   $('#view').innerHTML = html; settleImages($('#view')); document.title = title;
   document.querySelector('meta[name=description]').content = desc || 'Handcrafted art, necklaces, keychains and decor, made by hand in India.';
-  document.querySelectorAll('.nav a').forEach(a => a.toggleAttribute('aria-current', a.pathname === (path.startsWith('/product') ? '/shop' : path)));
   $('#sort')?.addEventListener('change', e => { sortBy = e.target.value; drawGrid(); });
   if ($('#sort')) $('#sort').value = sortBy;
   drawGrid(); if (!keep) scrollTo(0, 0);
@@ -307,16 +313,22 @@ function chrome() {
   $('#fcontact').innerHTML = links.join('');
 }
 
+let loading = false;
 async function load() {
+  if (loading) return;
+  loading = true;
+  markNav();
   $('#view').innerHTML = '<p class="empty">Loading…</p>';
+  let ok = false;
   try {
     const [p, c, r, g] = await Promise.all(['/api/products', '/api/config', '/api/reviews', '/api/gallery'].map(u => fetch(u).then(x => { if (!x.ok) throw 0; return x.json(); })));
     D.products = p; D.tags = c.tags; D.cfg = c.settings; D.reviews = r; D.gallery = g;
-    chrome(); route(true);
-  } catch {
-    $('#view').innerHTML = `<div class="empty"><h2>We couldn't load the shop</h2><p style="margin:10px 0 20px">Check your connection and try again.</p><button class="btn" id="retry">Try again</button></div>`;
-    $('#retry').onclick = load;
-  }
+    ok = true;
+  } catch {}
+  loading = false;
+  if (ok) { D.ready = true; chrome(); route(true); return; }
+  $('#view').innerHTML = `<div class="empty"><h2>We couldn't load the shop</h2><p style="margin:10px 0 20px">Check your connection and try again.</p><button class="btn" id="retry">Try again</button></div>`;
+  $('#retry').onclick = load;
 }
 // Old-style links like /#/shop or /#/ open the matching page; a plain / opens Home.
 if (location.hash.startsWith('#/')) history.replaceState({}, '', location.hash.slice(1));
