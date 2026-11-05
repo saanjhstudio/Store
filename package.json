@@ -2,6 +2,10 @@
   "name": "saanjh-studio",
   "private": true,
   "type": "module",
+  "scripts": {
+    "postinstall": "node scripts/setup-r2.mjs",
+    "setup-r2": "node scripts/setup-r2.mjs"
+  },
   "dependencies": {
     "@libsql/client": "^0.15.0",
     "hono": "^4.6.0"
