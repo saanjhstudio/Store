@@ -85,7 +85,7 @@ select{min-height:42px;padding:0 12px;background:var(--sf);border:1px solid var(
 .pp{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;padding:36px 0 0;align-items:start}
 @media(max-width:768px){.pp{grid-template-columns:1fr;gap:24px;padding-top:20px}}
 .crumb{font-size:13px;color:var(--tx3);padding-top:24px}.crumb a:hover{color:var(--rose)}
-.main-img{aspect-ratio:4/5;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;overflow:hidden;display:grid;place-items:center;font-size:90px}
+.main-img{position:relative;aspect-ratio:4/5;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;overflow:hidden;display:grid;place-items:center;font-size:90px}
 .main-img img{width:100%;height:100%;object-fit:cover}
 .thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto}
 .thumbs button{flex:0 0 68px;height:68px;border-radius:6px;overflow:hidden;border:2px solid transparent;opacity:.7}
@@ -115,6 +115,11 @@ select{min-height:42px;padding:0 12px;background:var(--sf);border:1px solid var(
 .gal figure{break-inside:avoid;margin:0 0 12px}
 .gal img{width:100%;border-radius:6px;border:1px solid var(--bd);background:var(--bg2)}
 .gal figcaption{font-size:13px;color:var(--tx3);padding:6px 2px 0}
+.gw{position:relative;border-radius:6px;overflow:hidden}.gw:has(.lb){min-height:160px;background:var(--bg2)}
+.lb{position:absolute;left:50%;top:50%;width:min(60%,180px);height:5px;transform:translate(-50%,-50%);border-radius:99px;background:color-mix(in srgb,var(--rose) 22%,transparent);z-index:2;pointer-events:none;overflow:hidden}
+.lb i{display:block;height:100%;width:0;background:var(--rose);border-radius:99px}
+.lb.go i{animation:lbgrow 9s cubic-bezier(.08,.7,.25,1) forwards}
+@keyframes lbgrow{to{width:92%}}
 @media(max-width:700px){.gal{columns:2;column-gap:10px}}
 footer{margin-top:72px;background:var(--bg2);border-top:1px solid var(--bd);padding:44px 0 calc(24px + env(safe-area-inset-bottom))}
 .fg{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:40px;margin-bottom:32px}
@@ -168,6 +173,27 @@ const fill = (t, p) => String(t).replace(/\{\{\s*product name\s*\}\}/gi, p.name)
 const DEF_MSG = "Hi Saanjh Studio! I'd like to order {{Product Name}} (Product ID: {{Product ID}}). Is it still available?";
 const D = { products: [], tags: [], reviews: [], gallery: [], cfg: {} };
 let sortBy = 'default', tt;
+const LB = '<span class="lb"><i></i></span>', DONE = 'onload="imgDone(this)" onerror="imgDone(this)"';
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('go'); io.unobserve(e.target); } }), { rootMargin: '150px' }) : null;
+function imgDone(img) {
+  const lb = img.parentElement.querySelector(':scope > .lb');
+  if (!lb || lb.dataset.done) return;
+  lb.dataset.done = 1;
+  const bar = lb.firstElementChild;
+  bar.style.width = getComputedStyle(bar).width;
+  bar.style.animation = 'none';
+  void bar.offsetWidth;
+  bar.style.transition = 'width .25s ease-out';
+  bar.style.width = '100%';
+  lb.style.transition = 'opacity .12s ease .2s';
+  lb.style.opacity = '0';
+  setTimeout(() => lb.remove(), 340);
+}
+function startBar(box) { if (box.querySelector(':scope > .lb')) return; box.insertAdjacentHTML('afterbegin', LB); settleImages(box); }
+function settleImages(root) {
+  root.querySelectorAll('.lb:not(.go)').forEach(el => io ? io.observe(el) : el.classList.add('go'));
+  root.querySelectorAll('img').forEach(i => i.complete && i.naturalWidth && imgDone(i));
+}
 const tagLabel = s => D.tags.find(t => t.slug === s)?.label || '';
 function toast(m) { const t = $('#toast'); t.textContent = m; t.className = 'show'; clearTimeout(tt); tt = setTimeout(() => t.className = '', 3200); }
 
@@ -186,7 +212,7 @@ function orderBtns(p) {
     (s.ig_enabled === '1' && s.instagram_handle ? '<p class="note">On Instagram, your message is copied for you. Just paste it in the chat.</p>' : '');
 }
 
-const card = p => `<a class="card" href="/product/${esc(p.slug)}" data-r><div class="ph">${p.images[0] ? `<img src="${esc(p.images[0])}" alt="${esc(p.name)}" loading="lazy">` : `<span class="em">${esc(p.emoji || '🎨')}</span>`}<span class="badge${p.inStock ? '' : ' sold'}">${p.inStock ? 'Available' : 'Sold'}</span></div><h3>${esc(p.name)}</h3>${p.tag ? `<span class="tg">${esc(tagLabel(p.tag))}</span>` : ''}<p class="pr${p.inStock ? '' : ' sold'}">${p.inStock ? inr(p.price) : 'Sold'}</p></a>`;
+const card = p => `<a class="card" href="/product/${esc(p.slug)}" data-r><div class="ph">${p.images[0] ? `${LB}<img src="${esc(p.images[0])}" alt="${esc(p.name)}" loading="lazy" ${DONE}>` : `<span class="em">${esc(p.emoji || '🎨')}</span>`}<span class="badge${p.inStock ? '' : ' sold'}">${p.inStock ? 'Available' : 'Sold'}</span></div><h3>${esc(p.name)}</h3>${p.tag ? `<span class="tg">${esc(tagLabel(p.tag))}</span>` : ''}<p class="pr${p.inStock ? '' : ' sold'}">${p.inStock ? inr(p.price) : 'Sold'}</p></a>`;
 const review = r => `<div class="rc"><div class="st" aria-label="${r.stars} out of 5 stars">${stars(r.stars)}</div><p>“${esc(r.review)}”</p><small>${esc(r.name)}</small></div>`;
 
 function home() {
@@ -215,11 +241,12 @@ function drawGrid() {
   if (sortBy === 'asc') l.sort((a, b) => a.price - b.price); else if (sortBy === 'desc') l.sort((a, b) => b.price - a.price);
   else if (sortBy === 'stock') l.sort((a, b) => b.inStock - a.inStock);
   g.innerHTML = l.map(card).join('') || '<p class="empty" style="grid-column:1/-1">No pieces here yet. New work is added often.</p>';
+  settleImages(g);
 }
 
 function product(slug) {
   const p = D.products.find(x => x.slug === slug); if (!p) return notFound();
-  const main = p.images[0] ? `<img id="mimg" src="${esc(p.images[0])}" alt="${esc(p.name)}">` : esc(p.emoji || '🎨');
+  const main = p.images[0] ? `${LB}<img id="mimg" src="${esc(p.images[0])}" alt="${esc(p.name)}" ${DONE}>` : esc(p.emoji || '🎨');
   return [`<p class="crumb"><a href="/shop" data-r>Shop</a> / ${esc(p.name)}</p><div class="pp"><div><div class="main-img">${main}</div>
     ${p.images.length > 1 ? `<div class="thumbs">${p.images.map((u, i) => `<button data-img="${esc(u)}" aria-label="Photo ${i + 1}" ${i ? '' : 'aria-current="true"'}><img src="${esc(u)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}</div>
     <div>${p.tag ? `<span class="tg">${esc(tagLabel(p.tag))}</span>` : ''}<h1>${esc(p.name)}</h1>
@@ -239,7 +266,7 @@ const about = () => [`<div class="page-h"><h1>Where Saanjh began</h1></div><div 
 const gallery = () => {
   const ig = D.cfg.instagram_handle;
   return [`<div class="page-h"><h1>A peek into our world</h1><p class="mute">Late nights, paint-stained hands, and the quiet joy of making.</p></div>
-    <div class="gal">${D.gallery.map(g => `<figure><img src="${esc(g.url)}" alt="${esc(g.caption || 'Studio photo')}" loading="lazy">${g.caption ? `<figcaption>${esc(g.caption)}</figcaption>` : ''}</figure>`).join('') || '<p class="empty">Photos from the studio will appear here soon.</p>'}</div>` +
+    <div class="gal">${D.gallery.map(g => `<figure><div class="gw">${LB}<img src="${esc(g.url)}" alt="${esc(g.caption || 'Studio photo')}" loading="lazy" ${DONE}></div>${g.caption ? `<figcaption>${esc(g.caption)}</figcaption>` : ''}</figure>`).join('') || '<p class="empty">Photos from the studio will appear here soon.</p>'}</div>` +
     (ig ? `<section class="sec"><div class="cta"><div><h2>Follow along</h2><p>Daily drops and behind-the-scenes on Instagram.</p></div><div class="ord"><a class="btn" target="_blank" rel="noopener" data-ev="social_click" href="https://www.instagram.com/${esc(ig)}/">Follow on Instagram</a></div></div></section>` : ''),
     'Gallery | Saanjh Studio', 'A look inside the Saanjh Studio: handmade work, studio moments and new pieces.'];
 };
@@ -249,7 +276,7 @@ function route(keep) {
   const path = location.pathname.replace(/\/+$/, '') || '/', q = new URLSearchParams(location.search); let m;
   const [html, title, desc, pid] = path === '/' ? home() : path === '/shop' ? shop(q.get('tag')) : path === '/gallery' ? gallery() : path === '/about' ? about() : path === '/reviews' ? reviews()
     : (m = path.match(/^\/product\/([\w-]+)$/)) ? product(m[1]) : notFound();
-  $('#view').innerHTML = html; document.title = title;
+  $('#view').innerHTML = html; settleImages($('#view')); document.title = title;
   document.querySelector('meta[name=description]').content = desc || 'Handcrafted art, necklaces, keychains and decor, made by hand in India.';
   document.querySelectorAll('.nav a').forEach(a => a.toggleAttribute('aria-current', a.pathname === (path.startsWith('/product') ? '/shop' : path)));
   $('#sort')?.addEventListener('change', e => { sortBy = e.target.value; drawGrid(); });
@@ -263,7 +290,7 @@ addEventListener('popstate', () => route(true));
 
 document.addEventListener('click', e => {
   const a = e.target.closest('a,button'); if (!a) return;
-  if (a.dataset.img) { $('#mimg').src = a.dataset.img; a.parentNode.querySelectorAll('button').forEach(b => b.removeAttribute('aria-current')); a.setAttribute('aria-current', 'true'); return; }
+  if (a.dataset.img) { const m = $('#mimg'); if (m.getAttribute('src') !== a.dataset.img) { startBar(m.parentElement); m.src = a.dataset.img; } a.parentNode.querySelectorAll('button').forEach(b => b.removeAttribute('aria-current')); a.setAttribute('aria-current', 'true'); return; }
   if (a.dataset.copy && navigator.clipboard) navigator.clipboard.writeText(a.dataset.copy).then(() => toast('Message copied. Paste it in the chat.')).catch(() => {});
   if (a.dataset.ev) track(a.dataset.ev, a.dataset.pid ? +a.dataset.pid : null);
   if (a.dataset.r !== undefined && !(e.metaKey || e.ctrlKey || e.shiftKey || e.button)) { e.preventDefault(); go(a.getAttribute('href'), a.dataset.keep !== undefined); }
