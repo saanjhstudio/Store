@@ -70,6 +70,15 @@ async function checkPassword(c, username, password, hash) {
 
 const app = new Hono();
 
+app.get('/api/health', async c => {
+  const missing = ['TURSO_DATABASE_URL', 'TURSO_AUTH_TOKEN', 'AUTH_URL', 'AUTH_SECRET'].filter(n => !c.env[n]);
+  let database = 'ok';
+  try { const db = makeDb(c.env); await ensureSchema(db); await db.execute('SELECT 1'); }
+  catch (e) { database = String(e.message || e).split('\n')[0].slice(0, 160); }
+  c.header('Cache-Control', 'no-store');
+  return c.json({ ok: !missing.length && database === 'ok', missing, database, r2: !!c.env.IMAGES });
+});
+
 app.use('/api/*', async (c, next) => {
   const db = makeDb(c.env);
   await ensureSchema(db);
