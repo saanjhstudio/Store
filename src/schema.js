@@ -91,6 +91,17 @@ const MIGRATIONS = [
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`,
   ],
+  // v3: tracked image files (bytes live in R2 or, for Turso uploads, in the data column)
+  [
+    `CREATE TABLE IF NOT EXISTS files (
+      key TEXT PRIMARY KEY,
+      store TEXT NOT NULL,
+      mime TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      data BLOB,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`,
+  ],
 ];
 
 let ready;
