@@ -61,8 +61,9 @@ code{background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:13px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:22px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
 .stat b{display:block;font:500 30px 'Playfair Display',serif;color:var(--rose)}
-.bars{height:130px;display:flex;align-items:flex-end;gap:3px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:22px}
-.bars i{flex:1;background:var(--rose);border-radius:2px 2px 0 0;min-width:2px;opacity:.85}
+.bars{height:130px;display:flex;align-items:flex-end;justify-content:space-between;gap:3px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:22px}
+.bars i{flex:1;max-width:40px;background:var(--rose);border-radius:2px 2px 0 0;min-width:2px;opacity:.85}.bars i.z{opacity:.3}
+.axis{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:-14px 0 22px;font-size:13px}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:22px}
 .li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
 table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
@@ -270,7 +271,10 @@ function editReview(id) {
 async function delReview(id) { if (!confirm('Delete this review?')) return; await api('/admin/reviews/' + id, 'DELETE'); toast('Review deleted'); vReviews(); }
 
 async function vAnalytics() {
-  const a = await api('/admin/analytics?days=' + S.days), t = a.totals, max = Math.max(1, ...a.daily.map(d => d.views));
+  const n = +S.days, a = await api('/admin/analytics?days=' + n), t = a.totals, max = Math.max(1, ...a.daily.map(d => d.views));
+  const span = Array.from({ length: n }, (_, i) => new Date(Date.now() - (n - 1 - i) * 864e5).toISOString().slice(0, 10));
+  const byDay = Object.fromEntries(a.daily.map(d => [d.day, d]));
+  const bars = span.map(d => { const v = byDay[d]?.views || 0; return `<i class="${v ? '' : 'z'}" style="height:${v ? Math.max(5, v / max * 100) : 2}%" title="${d}: ${v} views, ${byDay[d]?.visitors || 0} visitors"></i>`; }).join('');
   const rate = t.product_views ? Math.round(t.order_clicks / t.product_views * 100) + '%' : '—';
   const list = (rows, k) => rows.length ? rows.map(r => `<div class="li"><span>${esc(r[k] || 'Unknown')}</span><b>${r.n}</b></div>`).join('') : '<p class="mute">Nothing yet</p>';
   $('#view').innerHTML = `<div class="head"><h1>Analytics</h1>
@@ -280,7 +284,8 @@ async function vAnalytics() {
       <div class="stat"><b>${t.product_views}</b>Product views</div><div class="stat"><b>${t.order_clicks}</b>Order clicks</div>
       <div class="stat"><b>${rate}</b>Views that led to an order click</div></div>
     <h2>Page views per day</h2>
-    <div class="bars" role="img" aria-label="Page views per day">${a.daily.map(d => `<i style="height:${Math.max(3, d.views / max * 100)}%" title="${esc(d.day)}: ${d.views} views, ${d.visitors} visitors"></i>`).join('') || '<span class="mute">No visits recorded yet</span>'}</div>
+    <div class="bars" role="img" aria-label="Page views per day">${bars}</div>
+    <div class="axis mute"><span>${span[0]}</span><span>Busiest day: ${a.daily.length ? max : 0} views</span><span>${span[n - 1]}</span></div>
     <h2>Products</h2>
     <table><tr><th>Piece</th><th>Views</th><th>Order clicks</th><th>Rate</th></tr>${a.products.map(p => `<tr><td>${esc(p.name)}</td><td>${p.views}</td><td>${p.order_clicks}</td><td>${p.views ? Math.round(p.order_clicks / p.views * 100) + '%' : '—'}</td></tr>`).join('') || '<tr><td colspan="4" class="mute">No products yet</td></tr>'}</table>
     <div class="cols"><div><h2>Top pages</h2>${list(a.pages, 'path')}</div><div><h2>Where visitors come from</h2>${list(a.referrers, 'referrer')}</div>
