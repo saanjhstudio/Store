@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Lifetime analytics | Saanjh Studio</title>
+<script>try{var t=localStorage.getItem('saanjh-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fdf6f0;--bg2:#f7ede4;--surface:#fff;--line:rgba(180,100,90,.22);--text:#2d1a14;--mute:#7f5648;--rose:#c4607a;color-scheme:light}
+[data-theme=dark]{--bg:#1a0d10;--bg2:#231118;--surface:#2a1520;--line:rgba(196,96,122,.28);--text:#f5e6e0;--mute:#c4a090;--rose:#e07888;color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+body{font:400 14px/1.55 Raleway,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+h1{font:500 22px 'Playfair Display',Georgia,serif;margin-right:auto}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.mute{color:var(--mute)}
+header{display:flex;align-items:center;gap:16px;padding:10px 24px;border-bottom:1px solid var(--line)}
+.ghost{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;font-size:13px;text-decoration:none;color:var(--text);white-space:nowrap}
+.ghost:hover{border-color:var(--rose)}
+.ico{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:18px;border:1px solid var(--line);background:none;flex-shrink:0}.ico:hover{border-color:var(--rose)}
+main{max-width:1200px;margin:0 auto;padding:24px 24px 60px}
+#msg{padding:40px 24px;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
+.stat b{display:block;font:500 26px 'Playfair Display',serif;color:var(--rose)}
+.ctl{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.seg{display:flex}
+.seg button{padding:7px 16px;border:1px solid var(--line);background:none;color:var(--mute)}
+.seg button:first-child{border-radius:6px 0 0 6px}.seg button:last-child{border-radius:0 6px 6px 0;border-left:0}
+.seg button[aria-pressed=true]{background:var(--bg2);color:var(--rose);font-weight:600}
+.jump{display:flex;gap:8px}
+.chart{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 0 8px}
+.yaxis{position:relative;width:56px;height:300px;flex:none}
+.yaxis span{position:absolute;right:10px;transform:translateY(50%);font-size:12px;color:var(--mute)}
+.scroller{flex:1;overflow-x:auto;overflow-y:hidden;padding-bottom:6px}
+.inner{padding:0 12px;width:max-content}
+.plot{position:relative;height:300px;display:flex;align-items:flex-end;gap:4px;border-bottom:1px solid var(--line)}
+.g{position:absolute;left:0;right:0;border-top:1px dashed var(--line);pointer-events:none}
+.plot i{position:relative;z-index:1;width:12px;flex:none;height:100%;display:flex;align-items:flex-end}
+.plot s{display:block;width:100%;background:var(--rose);border-radius:3px 3px 0 0;opacity:.88;transition:opacity .1s}
+.plot s.z{opacity:.28}.plot i:hover s{opacity:1}
+.months{position:relative;height:34px;margin-top:6px}
+.months span{position:absolute;top:0;height:100%;padding-left:4px;border-left:1px solid var(--line);font-size:12px;color:var(--mute);white-space:nowrap}
+.note{margin-top:12px;font-size:13px}
+#tip{position:fixed;left:0;top:0;z-index:60;pointer-events:none;background:var(--text);color:var(--bg);padding:8px 12px;border-radius:8px;font-size:13px;line-height:1.45;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.3);opacity:0;transition:opacity .12s}
+#tip.on{opacity:1}#tip b{display:block;font-weight:600}
+@media(max-width:640px){header{padding:10px 14px;gap:10px}main{padding:18px 14px 50px}h1{font-size:18px}.yaxis{width:44px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <a class="ghost" href="/admin#analytics">Back to admin</a>
+  <h1>Lifetime analytics</h1>
+  <span class="mute" id="who"></span>
+  <button class="ico" id="theme" aria-label="Switch between light and dark theme">◐</button>
+</header>
+<p id="msg" class="mute">Checking your session…</p>
+<main id="app" hidden>
+  <div class="stats" id="stats"></div>
+  <div class="ctl">
+    <div class="seg"><button data-m="views" aria-pressed="true">Page views</button><button data-m="visitors" aria-pressed="false">Visitors</button></div>
+    <div class="jump"><button class="ghost" id="toStart">Go to start</button><button class="ghost" id="toEnd">Go to latest</button></div>
+  </div>
+  <div class="chart">
+    <div class="yaxis" id="yaxis"></div>
+    <div class="scroller" id="scroller" tabindex="0" aria-label="Lifetime chart. Scroll sideways to move through time."><div class="inner"><div class="plot" id="plot"></div><div class="months" id="months"></div></div></div>
+  </div>
+  <p class="mute note">Each bar is one day. Scroll sideways, or use the buttons, to move through time.</p>
+</main>
+<div id="tip" role="tooltip"></div>
+<script>
+const $ = s => document.querySelector(s);
+const STEP = 16;
+let days = [], metric = 'views';
+const nice = v => { const p = 10 ** Math.floor(Math.log10(v)), m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; };
+const fmt = n => n.toLocaleString('en-IN');
+
+async function init() {
+  let me;
+  try { me = await fetch('/api/me'); } catch { $('#msg').textContent = 'Could not reach the server. Please try again.'; return; }
+  if (!me.ok) { location.replace('/admin'); return; }
+  $('#who').textContent = (await me.json()).username;
+  const r = await fetch('/api/admin/analytics?days=all');
+  if (r.status === 401) { location.replace('/admin'); return; }
+  if (!r.ok) { $('#msg').textContent = 'Could not load the data. Please try again.'; return; }
+  const a = await r.json(), t = a.totals, by = Object.fromEntries(a.daily.map(d => [d.day, d]));
+  const first = a.daily[0]?.day, today = new Date().toISOString().slice(0, 10);
+  const n = first ? Math.round((Date.parse(today) - Date.parse(first)) / 864e5) + 1 : 0;
+  days = Array.from({ length: n }, (_, i) => { const d = new Date(Date.parse(first) + i * 864e5).toISOString().slice(0, 10); return { d, views: by[d]?.views || 0, visitors: by[d]?.visitors || 0 }; });
+  const best = days.reduce((m, x) => x.views > m.views ? x : m, { views: 0, d: '' });
+  const day = s => s ? new Date(s + 'T00:00:00Z').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '—';
+  $('#stats').innerHTML = [[fmt(t.visitors), 'Visitors'], [fmt(t.page_views), 'Page views'], [fmt(t.product_views), 'Product views'], [fmt(t.order_clicks), 'Order clicks'],
+    [day(first), 'Tracking since'], [best.views ? fmt(best.views) : '—', best.views ? 'Busiest day, ' + day(best.d) : 'Busiest day']].map(([v, l]) => `<div class="stat"><b>${v}</b>${l}</div>`).join('');
+  $('#msg').hidden = true; $('#app').hidden = false;
+  if (!n) { $('#msg').hidden = false; $('#msg').textContent = 'No visits recorded yet.'; }
+  draw(true);
+}
+
+function draw(toEnd) {
+  const sc = $('#scroller'), keep = sc.scrollLeft;
+  const top = nice(days.reduce((m, x) => Math.max(m, x[metric]), 1));
+  const segs = top % 4 === 0 ? 4 : top % 2 === 0 ? 2 : 1;
+  const ticks = Array.from({ length: segs + 1 }, (_, i) => i / segs);
+  $('#yaxis').innerHTML = ticks.map(p => `<span style="bottom:${p * 100}%">${fmt(top * p)}</span>`).join('');
+  const w = Math.max(0, days.length * STEP - 4);
+  $('#plot').style.width = w + 'px'; $('#months').style.width = w + 'px';
+  $('#plot').innerHTML = ticks.slice(1).map(p => `<div class="g" style="bottom:${p * 100}%"></div>`).join('') +
+    days.map(x => `<i data-d="${x.d}" data-v="${x.views}" data-u="${x.visitors}"><s class="${x[metric] ? '' : 'z'}" style="height:${x[metric] ? Math.max(1, x[metric] / top * 100) : 1}%"></s></i>`).join('');
+  $('#months').innerHTML = days.map((x, i) => {
+    if (i && !x.d.endsWith('-01')) return '';
+    const dt = new Date(x.d + 'T00:00:00Z');
+    return `<span style="left:${i * STEP}px">${dt.toLocaleDateString('en-IN', { month: 'short', timeZone: 'UTC' })}${!i || dt.getUTCMonth() === 0 ? ' ' + dt.getUTCFullYear() : ''}</span>`;
+  }).join('');
+  sc.scrollLeft = toEnd ? sc.scrollWidth : keep;
+}
+
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  metric = b.dataset.m;
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  draw(false);
+});
+$('#toStart').onclick = () => $('#scroller').scrollTo({ left: 0, behavior: 'smooth' });
+$('#toEnd').onclick = () => $('#scroller').scrollTo({ left: $('#scroller').scrollWidth, behavior: 'smooth' });
+$('#scroller').addEventListener('wheel', e => {
+  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.currentTarget.scrollLeft += e.deltaY; e.preventDefault(); }
+}, { passive: false });
+
+const tip = $('#tip');
+function moveTip(e) {
+  const bar = e.target.closest && e.target.closest('#plot i');
+  if (!bar) { tip.classList.remove('on'); return; }
+  const day = new Date(bar.dataset.d + 'T00:00:00Z').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const v = +bar.dataset.v, u = +bar.dataset.u;
+  tip.innerHTML = `<b>${day}</b>${v} page view${v === 1 ? '' : 's'} &middot; ${u} visitor${u === 1 ? '' : 's'}`;
+  tip.classList.add('on');
+  const r = tip.getBoundingClientRect(), x = Math.max(8, Math.min(e.clientX + 14, innerWidth - r.width - 8)), y = e.clientY - r.height - 14;
+  tip.style.transform = `translate(${x}px, ${y < 8 ? e.clientY + 18 : y}px)`;
+}
+document.addEventListener('pointermove', moveTip);
+document.addEventListener('pointerdown', moveTip);
+document.documentElement.addEventListener('mouseleave', () => tip.classList.remove('on'));
+addEventListener('scroll', () => tip.classList.remove('on'), true);
+
+$('#theme').onclick = () => {
+  const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('saanjh-theme', t); } catch {}
+};
+init();
+</script>
+</body>
+</html>
