@@ -125,7 +125,10 @@ footer{margin-top:72px;background:var(--bg2);border-top:1px solid var(--bd);padd
 .fg{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:40px;margin-bottom:32px}
 @media(max-width:768px){.fg{grid-template-columns:1fr 1fr;gap:28px}.fg>div:first-child{grid-column:1/-1}}
 footer h4{font-size:13px;font-weight:600;color:var(--rose);margin-bottom:12px}
-footer ul+h4{margin-top:22px}
+footer ul:not(:empty)+h4{margin-top:22px}
+#fstatus{margin-top:14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px}#fstatus:empty{display:none}
+.who{display:inline-block;padding:3px 14px;border:1px solid var(--bd2);border-radius:99px;font-size:13px;color:var(--rose);background:color-mix(in srgb,var(--rose) 10%,transparent)}
+.gh{font-size:13px;color:var(--tx3)}
 footer ul{list-style:none;display:flex;flex-direction:column}
 footer li a{display:inline-block;padding:6px 0;font-size:14px;color:var(--tx3)}footer li a:hover{color:var(--rose)}
 .fb{font:500 19px 'Playfair Display',serif;margin-bottom:8px;display:flex;align-items:center;gap:10px}.fb img{border-radius:50%;object-fit:cover}.fd{font-size:14px;color:var(--tx3);max-width:340px}
@@ -154,10 +157,10 @@ footer li a{display:inline-block;padding:6px 0;font-size:14px;color:var(--tx3)}f
 <footer>
   <div class="wrap">
     <div class="fg">
-      <div><p class="fb"><img src="/assets/images/logo.png" alt="" width="32" height="32" onerror="this.remove()">Saanjh Studio</p><p class="fd">Handcrafted art, necklaces, keychains and decor. Made with love in India, and named after the quiet magic of dusk.</p></div>
+      <div><p class="fb"><img src="/assets/images/logo.png" alt="" width="32" height="32" onerror="this.remove()">Saanjh Studio</p><p class="fd">Handcrafted art, necklaces, keychains and decor. Made with love in India, and named after the quiet magic of dusk.</p><div id="fstatus"></div></div>
       <div><h4>Explore</h4><ul>
         <li><a href="/" data-r>Home</a></li><li><a href="/shop" data-r>Shop</a></li><li><a href="/gallery" data-r>Gallery</a></li><li><a href="/about" data-r>About</a></li><li><a href="/reviews" data-r>Reviews</a></li></ul></div>
-      <div><h4>Get in touch</h4><ul id="fcontact"><li><a href="/shop" data-r>Browse the shop</a></li></ul><h4>Team</h4><ul><li><a href="/admin">Admin panel</a></li></ul></div>
+      <div><h4 hidden>Get in touch</h4><ul id="fcontact"></ul><h4>Team</h4><ul><li><a href="/admin">Admin panel</a></li></ul></div>
     </div>
     <div class="fine"><span>© 2026 Saanjh Studio. Made with ♥ in India.</span><span>Every piece is an original, handmade work.</span></div>
   </div>
@@ -304,13 +307,25 @@ document.addEventListener('click', e => {
 
 $('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try { localStorage.setItem('saanjh-theme', t); } catch {} };
 $('#menu').onclick = () => { const o = $('#top').classList.toggle('open'); $('#menu').setAttribute('aria-expanded', o); };
+function renderStatus() {
+  const bits = [];
+  if (D.admin) bits.push(`<span class="who">${esc(D.admin)}</span>`);
+  if (window.ghostmode) bits.push('<p class="gh">ghostmode is enabled</p>');
+  $('#fstatus').innerHTML = bits.join('');
+}
+addEventListener('ghostmode', renderStatus);
+function checkAdmin() {
+  if (!document.cookie.split('; ').includes('saanjh_admin=1')) return;
+  fetch('/api/me').then(r => r.ok ? r.json() : Promise.reject()).then(u => { D.admin = u.username; renderStatus(); })
+    .catch(() => { document.cookie = 'saanjh_admin=; Max-Age=0; path=/'; });
+}
 function chrome() {
   const s = D.cfg, a = $('#ann'); a.hidden = !s.announcement; a.textContent = s.announcement || '';
   const links = [];
-  if (s.ig_enabled === '1' && s.instagram_handle) links.push(`<li><a target="_blank" rel="noopener" data-ev="social_click" href="https://www.instagram.com/${esc(s.instagram_handle)}/">Instagram @${esc(s.instagram_handle)}</a></li>`);
-  if (s.wa_enabled === '1' && s.whatsapp) links.push(`<li><a target="_blank" rel="noopener" data-ev="social_click" href="https://wa.me/${esc(s.whatsapp)}">WhatsApp</a></li>`);
-  links.push('<li><a href="/shop" data-r>Browse the shop</a></li>');
+  if (s.instagram_handle) links.push(`<li><a target="_blank" rel="noopener" data-ev="social_click" href="https://www.instagram.com/${esc(s.instagram_handle)}/">Instagram</a></li>`);
+  if (s.whatsapp) links.push(`<li><a target="_blank" rel="noopener" data-ev="social_click" href="https://wa.me/${esc(s.whatsapp)}">WhatsApp</a></li>`);
   $('#fcontact').innerHTML = links.join('');
+  $('#fcontact').previousElementSibling.hidden = !links.length;
 }
 
 let loading = false;
@@ -332,6 +347,7 @@ async function load() {
 }
 // Old-style links like /#/shop or /#/ open the matching page; a plain / opens Home.
 if (location.hash.startsWith('#/')) history.replaceState({}, '', location.hash.slice(1));
+checkAdmin();
 load();
 </script>
 </body>
