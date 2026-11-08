@@ -12,6 +12,7 @@
       ghost = !!v;
       if (ghost) queue = [];
       console.log(ghost ? '👻 Ghost mode ON. Nothing is tracked until you refresh.' : 'Ghost mode OFF. Tracking resumed.');
+      window.dispatchEvent(new CustomEvent('ghostmode'));
     }
   });
 
