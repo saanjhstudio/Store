@@ -22,6 +22,7 @@ const int = (v, d = 0) => (Number.isFinite(+v) ? Math.trunc(+v) : d);
 const flag = v => (v ? 1 : 0);
 const cacheable = c => c.header('Cache-Control', 'public, max-age=30, s-maxage=60');
 
+const markAdmin = c => setCookie(c, 'saanjh_admin', '1', { secure: true, sameSite: 'Strict', path: '/', maxAge: SESSION_DAYS * 86400 });
 const makeDb = env => createClient({ url: env.TURSO_DATABASE_URL, authToken: env.TURSO_AUTH_TOKEN });
 const STORAGE_LIMITS = { r2: 10 * 1024 ** 3, turso: 5 * 1024 ** 3 };
 
@@ -229,6 +230,7 @@ app.post('/api/login', async c => {
     args: [await sha256(token), u.id, `+${SESSION_DAYS} days`],
   });
   setCookie(c, 'sid', token, { httpOnly: true, secure: true, sameSite: 'Strict', path: '/', maxAge: SESSION_DAYS * 86400 });
+  markAdmin(c);
   return c.json({ username: u.username, role: u.role, r2: !!c.env.IMAGES });
 });
 
@@ -236,11 +238,13 @@ app.post('/api/logout', async c => {
   const t = getCookie(c, 'sid');
   if (t) await c.get('db').execute({ sql: 'DELETE FROM sessions WHERE id_hash = ?', args: [await sha256(t)] });
   deleteCookie(c, 'sid', { path: '/' });
+  deleteCookie(c, 'saanjh_admin', { path: '/' });
   return c.json({ ok: true });
 });
 
 app.get('/api/me', async c => {
   const u = await getUser(c);
+  if (u) markAdmin(c);
   return u ? c.json({ ...u, r2: !!c.env.IMAGES }) : c.json({ error: 'Unauthorized' }, 401);
 });
 
