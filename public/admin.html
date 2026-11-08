@@ -8,9 +8,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('saanjh-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
 :root{--bg:#fdf6f0;--bg2:#f7ede4;--surface:#fff;--line:rgba(180,100,90,.2);--text:#2d1a14;--mute:#7f5648;--rose:#c4607a;--rose-ink:#fff;--ok:#3f8a5a;--bad:#b83a4b;color-scheme:light}
-@media(prefers-color-scheme:dark){:root{--bg:#1a0d10;--bg2:#231118;--surface:#2a1520;--line:rgba(196,96,122,.26);--text:#f5e6e0;--mute:#c4a090;--rose:#e07888;--rose-ink:#1a0d10;--ok:#6cc08a;--bad:#f28b99;color-scheme:dark}}
+[data-theme=dark]{--bg:#1a0d10;--bg2:#231118;--surface:#2a1520;--line:rgba(196,96,122,.26);--text:#f5e6e0;--mute:#c4a090;--rose:#e07888;--rose-ink:#1a0d10;--ok:#6cc08a;--bad:#f28b99;color-scheme:dark}
 *{box-sizing:border-box;margin:0}
 body{font:400 14px/1.55 Raleway,system-ui,sans-serif;background:var(--bg);color:var(--text)}
 h1,h2{font-family:'Playfair Display',Georgia,serif;font-weight:500}
@@ -38,6 +39,7 @@ nav a:hover{color:var(--text)}nav a.on{background:var(--bg2);color:var(--rose);f
 main{max-width:960px;margin:0 auto;padding:28px 24px 80px}
 .head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
 .row{display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+.ico{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:18px;border:1px solid var(--line);flex-shrink:0}.ico:hover{border-color:var(--rose)}
 .grow{flex:1;min-width:0}.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .num{width:72px}
 .thumb{width:56px;height:56px;border-radius:6px;background:var(--bg2);display:grid;place-items:center;font-size:26px;overflow:hidden;flex-shrink:0}
@@ -96,6 +98,7 @@ th{font-weight:600;color:var(--mute);font-size:13px}
   <header>
     <span class="brand">Saanjh admin</span>
     <nav id="tabs"></nav>
+    <button class="ico" id="theme" aria-label="Switch between light and dark theme">◐</button>
     <span class="mute" id="who"></span>
     <button class="ghost" id="out">Sign out</button>
   </header>
@@ -161,6 +164,11 @@ $('#loginForm').onsubmit = async e => {
   catch (err) { $('#loginErr').textContent = err.message; }
 };
 $('#out').onclick = async () => { await api('/logout', 'POST'); showLogin(); };
+$('#theme').onclick = () => {
+  const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('saanjh-theme', t); } catch {}
+};
 api('/me').then(u => { S.user = u; showApp(); }).catch(() => showLogin());
 
 async function squash(file) {
