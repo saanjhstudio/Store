@@ -425,7 +425,7 @@ app.patch('/api/admin/users/:id', async c => {
 });
 
 app.get('/api/admin/analytics', async c => {
-  const d = `-${Math.min(365, Math.max(1, int(c.req.query('days'), 30)))} days`;
+  const d = c.req.query('days') === 'all' ? '-36500 days' : `-${Math.min(365, Math.max(1, int(c.req.query('days'), 30)))} days`;
   const [tot, daily, prod, pages, refs, dev, ctry] = await c.get('db').batch([
     { sql: `SELECT COALESCE(SUM(type='page_view'),0) page_views, COUNT(DISTINCT sid) visitors, COALESCE(SUM(type='product_view'),0) product_views,
             COALESCE(SUM(type='order_click'),0) order_clicks, COALESCE(SUM(type='social_click'),0) social_clicks
