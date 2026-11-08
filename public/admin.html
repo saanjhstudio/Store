@@ -62,7 +62,11 @@ code{background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:13px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
 .stat b{display:block;font:500 30px 'Playfair Display',serif;color:var(--rose)}
 .bars{height:130px;display:flex;align-items:flex-end;justify-content:space-between;gap:3px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:22px}
-.bars i{flex:1;max-width:40px;background:var(--rose);border-radius:2px 2px 0 0;min-width:2px;opacity:.85}.bars i.z{opacity:.3}
+.bars i{flex:1;max-width:40px;min-width:2px;align-self:stretch;display:flex;align-items:flex-end}
+.bars s{display:block;width:100%;background:var(--rose);border-radius:2px 2px 0 0;opacity:.85;transition:opacity .1s}
+.bars s.z{opacity:.3}.bars i:hover s{opacity:1}
+#tip{position:fixed;left:0;top:0;z-index:60;pointer-events:none;background:var(--text);color:var(--bg);padding:8px 12px;border-radius:8px;font-size:13px;line-height:1.45;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.3);opacity:0;transition:opacity .12s}
+#tip.on{opacity:1}#tip b{display:block;font-weight:600}
 .axis{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:-14px 0 22px;font-size:13px}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:22px}
 .li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
@@ -100,6 +104,7 @@ th{font-weight:600;color:var(--mute);font-size:13px}
 
 <dialog id="dlg"></dialog>
 <div id="toast" role="status"></div>
+<div id="tip" role="tooltip"></div>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -274,7 +279,7 @@ async function vAnalytics() {
   const n = +S.days, a = await api('/admin/analytics?days=' + n), t = a.totals, max = Math.max(1, ...a.daily.map(d => d.views));
   const span = Array.from({ length: n }, (_, i) => new Date(Date.now() - (n - 1 - i) * 864e5).toISOString().slice(0, 10));
   const byDay = Object.fromEntries(a.daily.map(d => [d.day, d]));
-  const bars = span.map(d => { const v = byDay[d]?.views || 0; return `<i class="${v ? '' : 'z'}" style="height:${v ? Math.max(5, v / max * 100) : 2}%" title="${d}: ${v} views, ${byDay[d]?.visitors || 0} visitors"></i>`; }).join('');
+  const bars = span.map(d => { const v = byDay[d]?.views || 0; return `<i data-d="${d}" data-v="${v}" data-u="${byDay[d]?.visitors || 0}"><s class="${v ? '' : 'z'}" style="height:${v ? Math.max(5, v / max * 100) : 2}%"></s></i>`; }).join('');
   const rate = t.product_views ? Math.round(t.order_clicks / t.product_views * 100) + '%' : '—';
   const list = (rows, k) => rows.length ? rows.map(r => `<div class="li"><span>${esc(r[k] || 'Unknown')}</span><b>${r.n}</b></div>`).join('') : '<p class="mute">Nothing yet</p>';
   $('#view').innerHTML = `<div class="head"><h1>Analytics</h1>
@@ -388,6 +393,22 @@ const pwField = `<label>Password (10 to 64 characters)<input name="password" typ
 function addUser() { form('Add manager', `<label>Username<input name="username" pattern="[\\w.\\-]{3,32}" required></label>${pwField}`, async v => { await api('/admin/users', 'POST', v); toast('Manager added'); vTeam(); }); }
 function resetPw(id) { form('Reset password', pwField + '<p class="mute">They will be signed out everywhere.</p>', async v => { await api('/admin/users/' + id, 'PATCH', { password: v.password }); toast('Password reset'); }); }
 async function setActive(id, active) { await api('/admin/users/' + id, 'PATCH', { active }); toast(active ? 'Reactivated' : 'Deactivated'); vTeam(); }
+const tip = $('#tip');
+function moveTip(e) {
+  const bar = e.target.closest && e.target.closest('.bars i');
+  if (!bar) { tip.classList.remove('on'); return; }
+  const day = new Date(bar.dataset.d + 'T00:00:00Z').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const v = +bar.dataset.v, u = +bar.dataset.u;
+  tip.innerHTML = `<b>${day}</b>${v} page view${v === 1 ? '' : 's'} &middot; ${u} visitor${u === 1 ? '' : 's'}`;
+  tip.classList.add('on');
+  const r = tip.getBoundingClientRect(), x = Math.max(8, Math.min(e.clientX + 14, innerWidth - r.width - 8));
+  const y = e.clientY - r.height - 14;
+  tip.style.transform = `translate(${x}px, ${y < 8 ? e.clientY + 18 : y}px)`;
+}
+document.addEventListener('pointermove', moveTip);
+document.addEventListener('pointerdown', moveTip);
+document.documentElement.addEventListener('mouseleave', () => tip.classList.remove('on'));
+addEventListener('scroll', () => tip.classList.remove('on'), true);
 </script>
 </body>
 </html>
