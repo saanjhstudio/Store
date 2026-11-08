@@ -70,6 +70,7 @@ code{background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:13px}
 #tip{position:fixed;left:0;top:0;z-index:60;pointer-events:none;background:var(--text);color:var(--bg);padding:8px 12px;border-radius:8px;font-size:13px;line-height:1.45;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.3);opacity:0;transition:opacity .12s}
 #tip.on{opacity:1}#tip b{display:block;font-weight:600}
 .axis{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:-14px 0 22px;font-size:13px}
+.bars.thin{gap:1px;padding:12px 8px}.bars.thin i{min-width:0;max-width:none}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:22px}
 .li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
 table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
@@ -284,21 +285,30 @@ function editReview(id) {
 async function delReview(id) { if (!confirm('Delete this review?')) return; await api('/admin/reviews/' + id, 'DELETE'); toast('Review deleted'); vReviews(); }
 
 async function vAnalytics() {
-  const n = +S.days, a = await api('/admin/analytics?days=' + n), t = a.totals, max = Math.max(1, ...a.daily.map(d => d.views));
+  const all = S.days === 'all', a = await api('/admin/analytics?days=' + S.days), t = a.totals, max = Math.max(1, ...a.daily.map(d => d.views));
+  const today = new Date().toISOString().slice(0, 10), first = all ? (a.daily[0]?.day || today) : null;
+  const n = all ? Math.round((Date.parse(today) - Date.parse(first)) / 864e5) + 1 : +S.days;
   const span = Array.from({ length: n }, (_, i) => new Date(Date.now() - (n - 1 - i) * 864e5).toISOString().slice(0, 10));
   const byDay = Object.fromEntries(a.daily.map(d => [d.day, d]));
-  const bars = span.map(d => { const v = byDay[d]?.views || 0; return `<i data-d="${d}" data-v="${v}" data-u="${byDay[d]?.visitors || 0}"><s class="${v ? '' : 'z'}" style="height:${v ? Math.max(5, v / max * 100) : 2}%"></s></i>`; }).join('');
+  const size = Math.ceil(n / 365), rows = [];
+  for (let i = 0; i < n; i += size) {
+    const g = span.slice(i, i + size);
+    rows.push({ from: g[0], to: g[g.length - 1], v: g.reduce((s, d) => s + (byDay[d]?.views || 0), 0), u: g.reduce((s, d) => s + (byDay[d]?.visitors || 0), 0) });
+  }
+  const top = Math.max(1, ...rows.map(r => r.v));
+  const bars = rows.map(r => `<i data-d="${r.from}" data-e="${r.to}" data-v="${r.v}" data-u="${r.u}"><s class="${r.v ? '' : 'z'}" style="height:${r.v ? Math.max(5, r.v / top * 100) : 2}%"></s></i>`).join('');
   const rate = t.product_views ? Math.round(t.order_clicks / t.product_views * 100) + '%' : '—';
   const list = (rows, k) => rows.length ? rows.map(r => `<div class="li"><span>${esc(r[k] || 'Unknown')}</span><b>${r.n}</b></div>`).join('') : '<p class="mute">Nothing yet</p>';
   $('#view').innerHTML = `<div class="head"><h1>Analytics</h1>
-      <select style="width:auto" onchange="S.days=this.value;vAnalytics()">${[7, 30, 90].map(d => `<option value="${d}" ${d == S.days ? 'selected' : ''}>Last ${d} days</option>`).join('')}</select></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><a class="ghost" href="/lifetime" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">Open lifetime viewer</a>
+      <select style="width:auto" onchange="S.days=this.value;vAnalytics()">${[7, 30, 90].map(d => `<option value="${d}" ${d == S.days ? 'selected' : ''}>Last ${d} days</option>`).join('')}<option value="all" ${all ? 'selected' : ''}>Lifetime</option></select></div></div>
     <div class="stats">
       <div class="stat"><b>${t.visitors}</b>Visitors</div><div class="stat"><b>${t.page_views}</b>Page views</div>
       <div class="stat"><b>${t.product_views}</b>Product views</div><div class="stat"><b>${t.order_clicks}</b>Order clicks</div>
       <div class="stat"><b>${rate}</b>Views that led to an order click</div></div>
-    <h2>Page views per day</h2>
-    <div class="bars" role="img" aria-label="Page views per day">${bars}</div>
-    <div class="axis mute"><span>${span[0]}</span><span>Busiest day: ${a.daily.length ? max : 0} views</span><span>${span[n - 1]}</span></div>
+    <h2>${all ? 'Page views, lifetime' : 'Page views per day'}</h2>
+    <div class="bars${rows.length > 120 ? ' thin' : ''}" role="img" aria-label="Page views over time">${bars}</div>
+    <div class="axis mute"><span>${span[0]}</span><span>Busiest day: ${a.daily.length ? max : 0} views${size > 1 ? ` &middot; each bar covers ${size} days` : ''}</span><span>${span[n - 1]}</span></div>
     <h2>Products</h2>
     <table><tr><th>Piece</th><th>Views</th><th>Order clicks</th><th>Rate</th></tr>${a.products.map(p => `<tr><td>${esc(p.name)}</td><td>${p.views}</td><td>${p.order_clicks}</td><td>${p.views ? Math.round(p.order_clicks / p.views * 100) + '%' : '—'}</td></tr>`).join('') || '<tr><td colspan="4" class="mute">No products yet</td></tr>'}</table>
     <div class="cols"><div><h2>Top pages</h2>${list(a.pages, 'path')}</div><div><h2>Where visitors come from</h2>${list(a.referrers, 'referrer')}</div>
@@ -405,9 +415,11 @@ const tip = $('#tip');
 function moveTip(e) {
   const bar = e.target.closest && e.target.closest('.bars i');
   if (!bar) { tip.classList.remove('on'); return; }
-  const day = new Date(bar.dataset.d + 'T00:00:00Z').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const f = s => new Date(s + 'T00:00:00Z').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const range = bar.dataset.e && bar.dataset.e !== bar.dataset.d;
+  const day = range ? `${f(bar.dataset.d).replace(/^\w+, /, '')} to ${f(bar.dataset.e).replace(/^\w+, /, '')}` : f(bar.dataset.d);
   const v = +bar.dataset.v, u = +bar.dataset.u;
-  tip.innerHTML = `<b>${day}</b>${v} page view${v === 1 ? '' : 's'} &middot; ${u} visitor${u === 1 ? '' : 's'}`;
+  tip.innerHTML = `<b>${day}</b>${v} page view${v === 1 ? '' : 's'} &middot; ${u} ${range ? 'visit' : 'visitor'}${u === 1 ? '' : 's'}`;
   tip.classList.add('on');
   const r = tip.getBoundingClientRect(), x = Math.max(8, Math.min(e.clientX + 14, innerWidth - r.width - 8));
   const y = e.clientY - r.height - 14;
